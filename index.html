@@ -32,22 +32,21 @@ const phrases = [
   "Bạn là điều dễ thương nhất 🌟"
 ];
 
-// 🌟 Ba lớp: near, middle, far
+// 🌟 Ba lớp: near, middle, far (giảm số lượng chữ)
 const layers = {
   near: [],
   middle: [],
   far: []
 };
 
-// Tổng cộng 200 chữ chia ra 3 lớp
-const total = 200;
+const total = 90;
 for (let i = 0; i < total; i++) {
-  const layerName = i < total * 0.3 ? "near" : i < total * 0.7 ? "middle" : "far";
+  const layerName = i < total * 0.3 ? "near" : i < total * 0.6 ? "middle" : "far";
   const depth = layerName === "near" ? 0.4 :
-                layerName === "middle" ? 0.9 : 1.5;
+                layerName === "middle" ? 1.0 : 2.2;
   const z = layerName === "near" ? 100 :
             layerName === "middle" ? 0 :
-            -200;
+            -350;
   layers[layerName].push({
     text: phrases[Math.floor(Math.random() * phrases.length)],
     x: Math.random() * canvas.width,
@@ -59,7 +58,7 @@ for (let i = 0; i < total; i++) {
 }
 
 const stars = [];
-for (let i = 0; i < 300; i++) {
+for (let i = 0; i < 200; i++) {
   stars.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
@@ -68,19 +67,7 @@ for (let i = 0; i < 300; i++) {
   });
 }
 
-const hearts = [];
-for (let i = 0; i < 30; i++) {
-  hearts.push({
-    x: Math.random() * canvas.width,
-    y: canvas.height + Math.random() * canvas.height,
-    size: 10 + Math.random() * 20,
-    speed: 0.5 + Math.random(),
-    alpha: 0.5 + Math.random() * 0.5
-  });
-}
-
-let angleX = 0;
-let angleY = 0;
+let angleX = 0, angleY = 0;
 
 function drawBackgroundStars() {
   for (let star of stars) {
@@ -90,31 +77,6 @@ function drawBackgroundStars() {
     ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.globalAlpha = 1.0;
-}
-
-function drawHearts() {
-  hearts.forEach(h => {
-    ctx.save();
-    ctx.globalAlpha = h.alpha;
-    ctx.translate(h.x, h.y);
-    ctx.scale(h.size / 20, h.size / 20);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(-10, -10, -15, 10, 0, 20);
-    ctx.bezierCurveTo(15, 10, 10, -10, 0, 0);
-    ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
-    ctx.fill();
-    ctx.restore();
-
-    h.y -= h.speed;
-    if (h.y < -30) {
-      h.y = canvas.height + Math.random() * 100;
-      h.x = Math.random() * canvas.width;
-      h.size = 10 + Math.random() * 20;
-      h.alpha = 0.5 + Math.random() * 0.5;
-    }
-  });
   ctx.globalAlpha = 1.0;
 }
 
@@ -130,7 +92,6 @@ function drawLayer(layer, glowIntensity) {
     ctx.save();
     ctx.translate(drawX, drawY);
     ctx.scale(scale, scale);
-
     ctx.shadowColor = "rgba(255, 105, 180, 1)";
     ctx.shadowBlur = glowIntensity / l.depth;
     ctx.font = `bold 36px 'Segoe UI', sans-serif`;
@@ -143,7 +104,6 @@ function drawLayer(layer, glowIntensity) {
     if (l.y > canvas.height + 50) {
       l.y = -50;
       l.x = Math.random() * canvas.width;
-      l.z = l.z; // Giữ lớp hiện tại
       l.text = phrases[Math.floor(Math.random() * phrases.length)];
     }
   }
@@ -154,20 +114,17 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawBackgroundStars();
-  drawHearts();
-  drawLayer(layers.far, 25);
-  drawLayer(layers.middle, 55);
-  drawLayer(layers.near, 90);
+  drawLayer(layers.far, 20);
+  drawLayer(layers.middle, 50);
+  drawLayer(layers.near, 80);
 
   requestAnimationFrame(draw);
 }
-
 draw();
 
-// Điều khiển góc nhìn mượt
+// Góc nhìn điều khiển
 let isDragging = false;
 let lastX = 0, lastY = 0;
-
 function handleMove(x, y) {
   let dx = x - lastX;
   let dy = y - lastY;
@@ -182,24 +139,19 @@ canvas.addEventListener("mousedown", e => {
   lastX = e.clientX;
   lastY = e.clientY;
 });
-
 canvas.addEventListener("mousemove", e => {
   if (isDragging) handleMove(e.clientX, e.clientY);
 });
-
 canvas.addEventListener("mouseup", () => isDragging = false);
 canvas.addEventListener("mouseleave", () => isDragging = false);
-
 canvas.addEventListener("touchstart", e => {
   isDragging = true;
   lastX = e.touches[0].clientX;
   lastY = e.touches[0].clientY;
 });
-
 canvas.addEventListener("touchmove", e => {
   if (isDragging) handleMove(e.touches[0].clientX, e.touches[0].clientY);
 });
-
 canvas.addEventListener("touchend", () => isDragging = false);
 canvas.addEventListener("touchcancel", () => isDragging = false);
 
