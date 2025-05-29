@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Chữ Rơi Phối Cảnh 3D</title>
+  <title>Chữ Rơi 3D Dễ Thương</title>
   <style>
     html, body {
       margin: 0;
@@ -27,15 +27,23 @@
   canvas.height = window.innerHeight;
 
   const phrases = [
-    "Thư siêu xinh đẹp 💖", "Gửi bạn lời chúc 🎁", "Bạn là ánh sáng ✨", 
-    "Cười lên nhé 🌸", "Một món quà nhỏ 💌", "Dễ thương vô cực 🌟"
+    "Thư siêu xinh đẹp 💖", "Bạn là tia nắng ✨", "Luôn vui vẻ nhé 🌸",
+    "Dễ thương hết phần thiên hạ 💕", "Món quà nhỏ cho bạn 💌",
+    "Cười lên nào 😄", "Chúc bạn một ngày thật đẹp 🦋",
+    "Bạn là duy nhất 🌟", "Trái tim hồng 💗", "Siêu cấp dễ thương 🌈",
+    "Không gì sánh bằng 💫", "Ngọt ngào như kẹo 🍬", "Tỏa sáng như sao 🌠",
+    "Thế giới cần bạn 💝", "Chúc bạn luôn hạnh phúc 🌷", "Bạn là lý do để mỉm cười 😊",
+    "Yêu đời nha 😘", "Tỏa sáng lung linh 💎", "Mãi mãi xinh đẹp 💓",
+    "Bí ẩn như ánh trăng 🌙", "Ngọt như trà sữa 🧋", "Lấp lánh như ngôi sao ⭐",
+    "Chói lóa như ánh mặt trời ☀️", "Hồng hào như trái tim 💘",
+    "Bay cao như mây trắng ☁️", "Bạn là phép màu ✨", "Gửi bạn điều tốt lành 🍀"
   ];
 
   const letters = [];
-  const count = 120;
+  const count = 200;
 
   for (let i = 0; i < count; i++) {
-    const depth = Math.random() * 2 + 0.5; // 0.5 = gần, 2.5 = xa
+    const depth = Math.random() * 2 + 0.5;
     letters.push({
       text: phrases[Math.floor(Math.random() * phrases.length)],
       x: Math.random() * canvas.width,
@@ -52,8 +60,8 @@
 
     letters.forEach(l => {
       const perspectiveX = (l.depth - 1) * 200 * Math.sin(viewAngle);
-      const scale = 1 / l.depth; // Càng gần càng to
-      const speed = l.baseSpeed / l.depth; // Gần rơi nhanh hơn
+      const scale = 1 / l.depth;
+      const speed = l.baseSpeed / l.depth;
       const glow = 30 / l.depth;
 
       const drawX = l.x + perspectiveX;
@@ -66,13 +74,13 @@
       ctx.shadowColor = "rgba(255, 105, 180, 1)";
       ctx.shadowBlur = glow;
 
-      ctx.font = `30px sans-serif`; // Base size
+      ctx.font = `30px sans-serif`;
       ctx.fillStyle = "rgba(255, 182, 193, 0.95)";
       ctx.textAlign = "center";
       ctx.fillText(l.text, 0, 0);
       ctx.restore();
 
-      l.y += speed; // Cập nhật rơi
+      l.y += speed;
       if (l.y > canvas.height + 50) {
         l.y = -50;
         l.x = Math.random() * canvas.width;
@@ -87,7 +95,7 @@
 
   draw();
 
-  // Điều khiển góc nhìn bằng chuột và cảm ứng
+  // Điều khiển góc nhìn
   let isDragging = false, lastX = 0;
 
   canvas.addEventListener("mousedown", e => {
@@ -105,6 +113,7 @@
   canvas.addEventListener("mouseup", () => isDragging = false);
   canvas.addEventListener("mouseleave", () => isDragging = false);
 
+  // Điều khiển cảm ứng
   canvas.addEventListener("touchstart", e => {
     isDragging = true;
     lastX = e.touches[0].clientX;
@@ -120,7 +129,6 @@
   canvas.addEventListener("touchend", () => isDragging = false);
   canvas.addEventListener("touchcancel", () => isDragging = false);
 
-  // Responsive canvas
   window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
