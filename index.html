@@ -7,114 +7,150 @@
     html, body {
       margin: 0;
       overflow: hidden;
+      background: radial-gradient(ellipse at center, #111, #000);
       height: 100%;
-      background: radial-gradient(ellipse at center, #000, #111);
-      perspective: 1000px;
       touch-action: none;
     }
 
-    .world {
-      width: 100vw;
-      height: 100vh;
-      transform-style: preserve-3d;
-      position: relative;
-      transition: transform 0.1s ease-out;
-    }
-
-    .word {
-      position: absolute;
-      color: white;
-      font-weight: bold;
-      font-size: 2rem;
-      text-shadow:
-        0 0 4px #ff99cc,
-        0 0 12px #ff66cc,
-        0 0 24px #ff33cc;
-      transform-style: preserve-3d;
-      animation: float 10s infinite linear;
-    }
-
-    @keyframes float {
-      0%   { transform: translateY(0px); opacity: 1; }
-      50%  { transform: translateY(20px); opacity: 0.7; }
-      100% { transform: translateY(0px); opacity: 1; }
+    canvas {
+      display: block;
     }
   </style>
 </head>
 <body>
 
-<div class="world" id="world"></div>
+<canvas id="world"></canvas>
 
 <script>
+  const canvas = document.getElementById("world");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let W = canvas.width;
+  let H = canvas.height;
+
   const phrases = [
-    "Thư siêu xinh đẹp 💖",
-    "Món quà nhỏ 🎁",
-    "Lấp lánh ✨",
-    "Bạn là mặt trời 🌞",
-    "Cute vô cực 🐰",
-    "Trái tim ngọt ngào 💓",
-    "Ngôi sao trong đêm 🌟",
-    "Thế giới của bạn 🌍"
+    "Thư siêu xinh đẹp 💖", "Món quà nhỏ 🎁", "Lấp lánh ✨", "Bạn là mặt trời 🌞",
+    "Cute vô cực 🐰", "Ngôi sao trong đêm 🌟", "Thế giới của bạn 🌍", "Dễ thương nhất vũ trụ 💫"
   ];
 
-  const world = document.getElementById('world');
+  const dots = [];
+  const total = 250;
+  const radius = 500;
 
-  // Tạo nhiều dòng chữ phân bố khắp không gian 3D
-  const count = 100;
+  let angleX = 0;
+  let angleY = 0;
 
-  for (let i = 0; i < count; i++) {
-    const word = document.createElement('div');
-    word.className = 'word';
-    word.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+  for (let i = 0; i < total; i++) {
+    const theta = Math.random() * 2 * Math.PI;
+    const phi = Math.acos(2 * Math.random() - 1);
 
-    const x = (Math.random() - 0.5) * 2000;
-    const y = (Math.random() - 0.5) * 1200;
-    const z = (Math.random() - 0.5) * 2000;
-    const rotate = Math.random() * 360;
+    const x = radius * Math.sin(phi) * Math.cos(theta);
+    const y = radius * Math.sin(phi) * Math.sin(theta);
+    const z = radius * Math.cos(phi);
+    const word = phrases[Math.floor(Math.random() * phrases.length)];
 
-    word.style.transform = `
-      translate3d(${x}px, ${y}px, ${z}px)
-      rotateY(${rotate}deg)
-      rotateX(${rotate}deg)
-    `;
-
-    world.appendChild(word);
+    dots.push({ x, y, z, word, speed: 0.5 + Math.random() * 1.5 });
   }
 
-  // Điều khiển góc nhìn bằng chạm kéo
-  let rotateX = 0;
-  let rotateY = 0;
-  let lastX, lastY;
-  let isDragging = false;
+  function project(x, y, z) {
+    const scale = 800 / (800 + z);
+    const projX = x * scale + W / 2;
+    const projY = y * scale + H / 2;
+    return { x: projX, y: projY, scale };
+  }
 
-  document.addEventListener('touchstart', (e) => {
+  function rotateX3D(p, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const y = p.y * cos - p.z * sin;
+    const z = p.z * cos + p.y * sin;
+    return { x: p.x, y, z, word: p.word, speed: p.speed };
+  }
+
+  function rotateY3D(p, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const x = p.x * cos - p.z * sin;
+    const z = p.z * cos + p.x * sin;
+    return { x, y: p.y, z, word: p.word, speed: p.speed };
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < dots.length; i++) {
+      let p = dots[i];
+
+      // Rơi từ từ (theo hướng y)
+      p.y += p.speed;
+      if (p.y > radius) p.y = -radius;
+
+      // Xoay toàn cầu
+      p = rotateX3D(p, angleX);
+      p = rotateY3D(p, angleY);
+      dots[i] = p;
+
+      const proj = project(p.x, p.y, p.z);
+      ctx.save();
+      ctx.translate(proj.x, proj.y);
+      ctx.scale(proj.scale, proj.scale);
+      ctx.fillStyle = "rgba(255, 182, 193, 0.9)";
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(p.word, 0, 0);
+      ctx.restore();
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  render();
+
+  // Điều khiển xoay bằng chuột hoặc chạm
+  let isDragging = false, lastX, lastY;
+
+  canvas.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    let dx = e.clientX - lastX;
+    let dy = e.clientY - lastY;
+    angleY += dx * 0.005;
+    angleX += dy * 0.005;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+
+  canvas.addEventListener("mouseup", () => isDragging = false);
+
+  // Cho cảm ứng
+  canvas.addEventListener("touchstart", (e) => {
     isDragging = true;
     lastX = e.touches[0].clientX;
     lastY = e.touches[0].clientY;
   });
 
-  document.addEventListener('touchmove', (e) => {
+  canvas.addEventListener("touchmove", (e) => {
     if (!isDragging) return;
-
-    const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
-
-    const dx = currentX - lastX;
-    const dy = currentY - lastY;
-
-    rotateY += dx * 0.2;
-    rotateX -= dy * 0.2;
-
-    rotateX = Math.max(-90, Math.min(90, rotateX));
-
-    world.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-
-    lastX = currentX;
-    lastY = currentY;
+    let dx = e.touches[0].clientX - lastX;
+    let dy = e.touches[0].clientY - lastY;
+    angleY += dx * 0.005;
+    angleX += dy * 0.005;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
   });
 
-  document.addEventListener('touchend', () => {
-    isDragging = false;
+  canvas.addEventListener("touchend", () => isDragging = false);
+
+  window.addEventListener("resize", () => {
+    canvas.width = W = window.innerWidth;
+    canvas.height = H = window.innerHeight;
   });
 </script>
 
