@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Chữ Rơi Phát Sáng 3D</title>
+  <title>Chữ Rơi Phối Cảnh 3D</title>
   <style>
     html, body {
       margin: 0;
@@ -32,15 +32,16 @@
   ];
 
   const letters = [];
-  const count = 100;
+  const count = 120;
 
   for (let i = 0; i < count; i++) {
+    const depth = Math.random() * 2 + 0.5; // 0.5 = gần, 2.5 = xa
     letters.push({
       text: phrases[Math.floor(Math.random() * phrases.length)],
       x: Math.random() * canvas.width,
       y: Math.random() * -canvas.height,
-      speed: 1 + Math.random() * 1.5,
-      depth: Math.random() * 2 + 0.5 // 0.5 = gần nhất, 2.5 = xa nhất
+      depth: depth,
+      baseSpeed: 1 + Math.random() * 1.5
     });
   }
 
@@ -51,8 +52,9 @@
 
     letters.forEach(l => {
       const perspectiveX = (l.depth - 1) * 200 * Math.sin(viewAngle);
-      const scale = 1 / l.depth; // Gần to, xa nhỏ
-      const glow = 20 / l.depth; // Gần sáng hơn
+      const scale = 1 / l.depth; // Càng gần càng to
+      const speed = l.baseSpeed / l.depth; // Gần rơi nhanh hơn
+      const glow = 30 / l.depth;
 
       const drawX = l.x + perspectiveX;
       const drawY = l.y;
@@ -60,21 +62,23 @@
       ctx.save();
       ctx.translate(drawX, drawY);
       ctx.scale(scale, scale);
+
       ctx.shadowColor = "rgba(255, 105, 180, 1)";
       ctx.shadowBlur = glow;
 
-      ctx.font = `24px sans-serif`;
+      ctx.font = `30px sans-serif`; // Base size
       ctx.fillStyle = "rgba(255, 182, 193, 0.95)";
       ctx.textAlign = "center";
       ctx.fillText(l.text, 0, 0);
       ctx.restore();
 
-      l.y += l.speed * scale;
-      if (l.y > canvas.height + 30) {
-        l.y = -30;
+      l.y += speed; // Cập nhật rơi
+      if (l.y > canvas.height + 50) {
+        l.y = -50;
         l.x = Math.random() * canvas.width;
         l.depth = Math.random() * 2 + 0.5;
         l.text = phrases[Math.floor(Math.random() * phrases.length)];
+        l.baseSpeed = 1 + Math.random() * 1.5;
       }
     });
 
@@ -83,41 +87,40 @@
 
   draw();
 
-  // Điều khiển chuột
+  // Điều khiển góc nhìn bằng chuột và cảm ứng
   let isDragging = false, lastX = 0;
 
-  canvas.addEventListener("mousedown", (e) => {
+  canvas.addEventListener("mousedown", e => {
     isDragging = true;
     lastX = e.clientX;
   });
 
-  canvas.addEventListener("mousemove", (e) => {
+  canvas.addEventListener("mousemove", e => {
     if (!isDragging) return;
     let dx = e.clientX - lastX;
-    viewAngle += dx * 0.002; // Giảm độ nhạy
+    viewAngle += dx * 0.002;
     lastX = e.clientX;
   });
 
   canvas.addEventListener("mouseup", () => isDragging = false);
   canvas.addEventListener("mouseleave", () => isDragging = false);
 
-  // Điều khiển cảm ứng
-  canvas.addEventListener("touchstart", (e) => {
+  canvas.addEventListener("touchstart", e => {
     isDragging = true;
     lastX = e.touches[0].clientX;
   });
 
-  canvas.addEventListener("touchmove", (e) => {
+  canvas.addEventListener("touchmove", e => {
     if (!isDragging) return;
     let dx = e.touches[0].clientX - lastX;
-    viewAngle += dx * 0.002; // Vuốt mượt
+    viewAngle += dx * 0.002;
     lastX = e.touches[0].clientX;
   });
 
   canvas.addEventListener("touchend", () => isDragging = false);
   canvas.addEventListener("touchcancel", () => isDragging = false);
 
-  // Responsive
+  // Responsive canvas
   window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
