@@ -1,32 +1,41 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Gửi bạn Thư siêu xinh đẹp 💖</title>
+  <meta charset="UTF-8" />
+  <title>Không gian 3D cho Thư 💖</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: radial-gradient(circle at center, #111, #000);
+      padding: 0;
       overflow: hidden;
-      height: 100vh;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      perspective: 1200px;
-      cursor: grab;
+      height: 100%;
+      background: radial-gradient(circle, #111, #000);
+      font-family: sans-serif;
+      perspective: 1000px;
+      touch-action: none;
     }
 
-    .wrapper {
+    .scene {
       width: 100vw;
       height: 100vh;
       transform-style: preserve-3d;
-      transition: transform 0.1s linear;
+      position: relative;
+      transition: transform 0.1s ease-out;
     }
 
-    .falling {
+    .word {
       position: absolute;
-      top: -60px;
-      white-space: nowrap;
+      top: 0;
+      left: 0;
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+      text-shadow:
+        0 0 4px #ff99cc,
+        0 0 12px #ff66cc,
+        0 0 24px #ff33cc;
       animation: fall linear infinite;
-      transform-style: preserve-3d;
+      white-space: nowrap;
     }
 
     @keyframes fall {
@@ -35,101 +44,81 @@
         opacity: 1;
       }
       100% {
-        transform: translateY(110vh);
+        transform: translateY(120vh);
         opacity: 0.2;
       }
-    }
-
-    .shiny {
-      font-weight: bold;
-      color: #fff;
-      text-shadow:
-        0 0 6px #ff99cc,
-        0 0 12px #ff66b2,
-        0 0 20px #ff33a6,
-        0 0 40px #ff1a8c;
     }
   </style>
 </head>
 <body>
 
-<div class="wrapper" id="sceneWrapper"></div>
+<div class="scene" id="scene"></div>
 
 <script>
+  const scene = document.getElementById('scene');
+
   const phrases = [
     "Gửi bạn Thư siêu xinh đẹp 💖",
     "Món quà nhỏ 🎁",
-    "Dễ thương hết cỡ 💕",
-    "Tỏa sáng lung linh ✨",
-    "Bạn là điều tuyệt vời nhất 🌟",
-    "Chúc bạn luôn vui vẻ 🌸",
-    "Thư siêu cute 🐰",
-    "Thư xinh nhất vũ trụ 💓"
+    "Dễ thương vô cực 🌸",
+    "Chúc ngày vui tươi 🌞",
+    "Tỏa sáng như ngôi sao ✨",
+    "Thư cute số 1 🐰",
+    "Bạn là nhất 💕",
+    "Lấp lánh giữa trời đêm 🌟"
   ];
 
-  const layers = [
-    { depth: 120, scale: 0.5, amount: 10, speed: 10 },
-    { depth: 60,  scale: 1.0, amount: 30, speed: 6 },
-    { depth: 10,  scale: 1.6, amount: 25, speed: 4 },
-    { depth: 0,   scale: 2.4, amount: 10, speed: 2 }
-  ];
+  const count = 80;
 
-  const wrapper = document.getElementById("sceneWrapper");
+  for (let i = 0; i < count; i++) {
+    const word = document.createElement('div');
+    word.className = 'word';
+    word.textContent = phrases[Math.floor(Math.random() * phrases.length)];
 
-  layers.forEach(layer => {
-    for (let i = 0; i < layer.amount; i++) {
-      const el = document.createElement("div");
-      el.className = "falling shiny";
-      el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+    const x = Math.random() * window.innerWidth;
+    const z = Math.random() * -1000; // khoảng cách chiều sâu
+    const delay = Math.random() * 5;
+    const duration = 4 + Math.random() * 6;
 
-      const left = Math.random() * 100;
-      const rotateZ = (Math.random() - 0.5) * 30; // Nghiêng chữ nhẹ
-      el.style.left = `${left}vw`;
-      el.style.fontSize = `${24 * layer.scale + Math.random() * 10}px`;
-      el.style.animationDuration = `${layer.speed + Math.random() * 2}s`;
-      el.style.animationDelay = `${Math.random() * 5}s`;
-      el.style.transform = `
-        translateZ(-${layer.depth}px)
-        rotateZ(${rotateZ}deg)
-      `;
+    word.style.left = `${x}px`;
+    word.style.transform = `translateZ(${z}px)`;
+    word.style.animationDuration = `${duration}s`;
+    word.style.animationDelay = `${delay}s`;
 
-      wrapper.appendChild(el);
-    }
-  });
+    scene.appendChild(word);
+  }
 
-  // 🌟 Điều khiển góc nhìn bằng chạm kéo (touch)
-  let rotateX = 10;
-  let rotateY = 10;
+  // Điều khiển góc nhìn bằng cảm ứng chạm
+  let rotateX = 0;
+  let rotateY = 0;
   let lastX, lastY;
   let isTouching = false;
 
-  document.addEventListener("touchstart", (e) => {
+  document.addEventListener('touchstart', (e) => {
     isTouching = true;
     lastX = e.touches[0].clientX;
     lastY = e.touches[0].clientY;
   });
 
-  document.addEventListener("touchmove", (e) => {
+  document.addEventListener('touchmove', (e) => {
     if (!isTouching) return;
-
     const currentX = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
-
     const dx = currentX - lastX;
     const dy = currentY - lastY;
 
-    rotateY += dx * 0.3;
-    rotateX -= dy * 0.3;
+    rotateY += dx * 0.2;
+    rotateX -= dy * 0.2;
 
-    rotateX = Math.max(-80, Math.min(80, rotateX));
+    rotateX = Math.max(-45, Math.min(45, rotateX));
 
-    wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    scene.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
     lastX = currentX;
     lastY = currentY;
   });
 
-  document.addEventListener("touchend", () => {
+  document.addEventListener('touchend', () => {
     isTouching = false;
   });
 </script>
