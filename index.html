@@ -28,7 +28,7 @@
       }
       100% {
         transform: translateY(110vh);
-        opacity: 0.3;
+        opacity: 0.2;
       }
     }
 
@@ -58,11 +58,11 @@
     "Bạn là điều tuyệt vời nhất 🌟"
   ];
 
-  const total = 90;
   const layers = [
-    { depth: 100, scale: 0.6, amount: 20, speed: 10 },  // Xa: nhỏ, ít, chậm
-    { depth: 50, scale: 1.0, amount: 50, speed: 6 },   // Trung: nhiều, vừa
-    { depth: 10, scale: 1.5, amount: 20, speed: 3 }    // Gần: to, ít, nhanh
+    { depth: 120, scale: 0.5, amount: 15, speed: 10 },   // Xa: nhỏ, chậm, ít
+    { depth: 60,  scale: 1.0, amount: 40, speed: 6  },   // Trung: vừa, nhiều
+    { depth: 10,  scale: 1.6, amount: 25, speed: 4  },   // Gần: to, trung bình
+    { depth: 0,   scale: 2.4, amount: 8,  speed: 2  }    // RẤT GẦN: to nhất, siêu gần
   ];
 
   layers.forEach(layer => {
