@@ -48,7 +48,7 @@
 <script>
   const phrases = [
     "Gửi bạn Thư xinh đẹp 💌",
-    "siêu dễ thương 💓",
+    "Món quà nhỏ 🎁",
     "Dễ thương hết cỡ 💖",
     "Tỏa sáng lung linh ✨",
     "Đáng yêu vô cực 💕",
@@ -72,8 +72,7 @@
       el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
       const left = Math.random() * 100;
-      const rotateY = (Math.random() - 0.5) * 30; // nghiêng trái phải
-      const rotateX = (Math.random() - 0.5) * 10; // nghiêng lên xuống
+      const rotateZ = (Math.random() - 0.5) * 30; // nghiêng trái/phải mặt ngang
 
       el.style.left = `${left}vw`;
       el.style.fontSize = `${24 * layer.scale + Math.random() * 10}px`;
@@ -81,8 +80,7 @@
       el.style.animationDelay = `${Math.random() * 5}s`;
       el.style.transform = `
         translateZ(-${layer.depth}px)
-        rotateY(${rotateY}deg)
-        rotateX(${rotateX}deg)
+        rotateZ(${rotateZ}deg)
       `;
 
       document.body.appendChild(el);
