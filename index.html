@@ -48,7 +48,7 @@
 <script>
   const phrases = [
     "Gửi bạn Thư xinh đẹp 💌",
-    "Luôn Luôn Hạnh Phúc 💖",
+    "siêu dễ thương 💓",
     "Dễ thương hết cỡ 💖",
     "Tỏa sáng lung linh ✨",
     "Đáng yêu vô cực 💕",
@@ -59,10 +59,10 @@
   ];
 
   const layers = [
-    { depth: 120, scale: 0.5, amount: 15, speed: 10 },   // Xa: nhỏ, chậm, ít
-    { depth: 60,  scale: 1.0, amount: 40, speed: 6  },   // Trung: vừa, nhiều
-    { depth: 10,  scale: 1.6, amount: 25, speed: 4  },   // Gần: to, trung bình
-    { depth: 0,   scale: 2.4, amount: 8,  speed: 2  }    // RẤT GẦN: to nhất, siêu gần
+    { depth: 120, scale: 0.5, amount: 15, speed: 10 },
+    { depth: 60,  scale: 1.0, amount: 40, speed: 6 },
+    { depth: 10,  scale: 1.6, amount: 25, speed: 4 },
+    { depth: 0,   scale: 2.4, amount: 8,  speed: 2 }
   ];
 
   layers.forEach(layer => {
@@ -72,11 +72,18 @@
       el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
       const left = Math.random() * 100;
+      const rotateY = (Math.random() - 0.5) * 30; // nghiêng trái phải
+      const rotateX = (Math.random() - 0.5) * 10; // nghiêng lên xuống
+
       el.style.left = `${left}vw`;
       el.style.fontSize = `${24 * layer.scale + Math.random() * 10}px`;
       el.style.animationDuration = `${layer.speed + Math.random() * 2}s`;
       el.style.animationDelay = `${Math.random() * 5}s`;
-      el.style.transform = `translateZ(-${layer.depth}px)`;
+      el.style.transform = `
+        translateZ(-${layer.depth}px)
+        rotateY(${rotateY}deg)
+        rotateX(${rotateX}deg)
+      `;
 
       document.body.appendChild(el);
     }
