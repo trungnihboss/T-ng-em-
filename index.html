@@ -19,177 +19,194 @@
 <canvas id="canvas"></canvas>
 
 <script>
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const phrases = [
+  "Gửi bạn siêu xinh đẹp 💖",
+  "Một món quà nhỏ 🎁",
+  "Bạn là ánh sáng ✨",
+  "Cười lên nha 😄",
+  "Bạn là điều dễ thương nhất 🌟"
+];
+
+// 🌟 Ba lớp: near, middle, far
+const layers = {
+  near: [],
+  middle: [],
+  far: []
+};
+
+// Tổng cộng 200 chữ chia ra 3 lớp
+const total = 200;
+for (let i = 0; i < total; i++) {
+  const layerName = i < total * 0.3 ? "near" : i < total * 0.7 ? "middle" : "far";
+  const depth = layerName === "near" ? 0.4 :
+                layerName === "middle" ? 0.9 : 1.5;
+  const z = layerName === "near" ? 100 :
+            layerName === "middle" ? 0 :
+            -200;
+  layers[layerName].push({
+    text: phrases[Math.floor(Math.random() * phrases.length)],
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    z: z + Math.random() * 100 - 50,
+    depth: depth,
+    speed: layerName === "near" ? 3.5 : layerName === "middle" ? 2 : 1
+  });
+}
+
+const stars = [];
+for (let i = 0; i < 300; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.5,
+    opacity: Math.random()
+  });
+}
+
+const hearts = [];
+for (let i = 0; i < 30; i++) {
+  hearts.push({
+    x: Math.random() * canvas.width,
+    y: canvas.height + Math.random() * canvas.height,
+    size: 10 + Math.random() * 20,
+    speed: 0.5 + Math.random(),
+    alpha: 0.5 + Math.random() * 0.5
+  });
+}
+
+let angleX = 0;
+let angleY = 0;
+
+function drawBackgroundStars() {
+  for (let star of stars) {
+    ctx.beginPath();
+    ctx.globalAlpha = star.opacity;
+    ctx.fillStyle = "white";
+    ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1.0;
+}
+
+function drawHearts() {
+  hearts.forEach(h => {
+    ctx.save();
+    ctx.globalAlpha = h.alpha;
+    ctx.translate(h.x, h.y);
+    ctx.scale(h.size / 20, h.size / 20);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-10, -10, -15, 10, 0, 20);
+    ctx.bezierCurveTo(15, 10, 10, -10, 0, 0);
+    ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
+    ctx.fill();
+    ctx.restore();
+
+    h.y -= h.speed;
+    if (h.y < -30) {
+      h.y = canvas.height + Math.random() * 100;
+      h.x = Math.random() * canvas.width;
+      h.size = 10 + Math.random() * 20;
+      h.alpha = 0.5 + Math.random() * 0.5;
+    }
+  });
+  ctx.globalAlpha = 1.0;
+}
+
+function drawLayer(layer, glowIntensity) {
+  for (let l of layer) {
+    let perspectiveX = (l.z * Math.sin(angleX)) + (l.x - canvas.width/2) * Math.cos(angleX);
+    let perspectiveY = (l.z * Math.sin(angleY)) + (l.y - canvas.height/2) * Math.cos(angleY);
+
+    const scale = 1 / l.depth;
+    const drawX = canvas.width / 2 + perspectiveX;
+    const drawY = canvas.height / 2 + perspectiveY;
+
+    ctx.save();
+    ctx.translate(drawX, drawY);
+    ctx.scale(scale, scale);
+
+    ctx.shadowColor = "rgba(255, 105, 180, 1)";
+    ctx.shadowBlur = glowIntensity / l.depth;
+    ctx.font = `bold 36px 'Segoe UI', sans-serif`;
+    ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
+    ctx.textAlign = "center";
+    ctx.fillText(l.text, 0, 0);
+    ctx.restore();
+
+    l.y += l.speed / l.depth;
+    if (l.y > canvas.height + 50) {
+      l.y = -50;
+      l.x = Math.random() * canvas.width;
+      l.z = l.z; // Giữ lớp hiện tại
+      l.text = phrases[Math.floor(Math.random() * phrases.length)];
+    }
+  }
+}
+
+function draw() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawBackgroundStars();
+  drawHearts();
+  drawLayer(layers.far, 25);
+  drawLayer(layers.middle, 55);
+  drawLayer(layers.near, 90);
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+// Điều khiển góc nhìn mượt
+let isDragging = false;
+let lastX = 0, lastY = 0;
+
+function handleMove(x, y) {
+  let dx = x - lastX;
+  let dy = y - lastY;
+  angleX += dx * 0.002;
+  angleY += dy * 0.002;
+  lastX = x;
+  lastY = y;
+}
+
+canvas.addEventListener("mousedown", e => {
+  isDragging = true;
+  lastX = e.clientX;
+  lastY = e.clientY;
+});
+
+canvas.addEventListener("mousemove", e => {
+  if (isDragging) handleMove(e.clientX, e.clientY);
+});
+
+canvas.addEventListener("mouseup", () => isDragging = false);
+canvas.addEventListener("mouseleave", () => isDragging = false);
+
+canvas.addEventListener("touchstart", e => {
+  isDragging = true;
+  lastX = e.touches[0].clientX;
+  lastY = e.touches[0].clientY;
+});
+
+canvas.addEventListener("touchmove", e => {
+  if (isDragging) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+});
+
+canvas.addEventListener("touchend", () => isDragging = false);
+canvas.addEventListener("touchcancel", () => isDragging = false);
+
+window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-
-  const stars = [];
-  for (let i = 0; i < 300; i++) {
-    stars.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.5,
-      opacity: Math.random()
-    });
-  }
-
-  const phrases = [
-    "Gửi bạn siêu xinh đẹp 💖",
-    "Cười lên nha 😄",
-    "Bạn là điều dễ thương nhất 🌟"
-  ];
-
-  const letters = [];
-  const count = 25;
-  for (let i = 0; i < count; i++) {
-    letters.push({
-      text: phrases[Math.floor(Math.random() * phrases.length)],
-      x: Math.random() * canvas.width,
-      y: Math.random() * -canvas.height,
-      z: Math.random() * 600 - 300,
-      depth: Math.random() * 1.2 + 0.4,
-      speed: 2 + Math.random() * 2
-    });
-  }
-
-  const hearts = [];
-  for (let i = 0; i < 30; i++) {
-    hearts.push({
-      x: Math.random() * canvas.width,
-      y: canvas.height + Math.random() * canvas.height,
-      size: 10 + Math.random() * 20,
-      speed: 0.5 + Math.random(),
-      alpha: 0.5 + Math.random() * 0.5
-    });
-  }
-
-  let angleX = 0;
-  let angleY = 0;
-
-  function drawBackgroundStars() {
-    for (let star of stars) {
-      ctx.beginPath();
-      ctx.globalAlpha = star.opacity;
-      ctx.fillStyle = "white";
-      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1.0;
-  }
-
-  function drawHearts() {
-    hearts.forEach(h => {
-      ctx.save();
-      ctx.globalAlpha = h.alpha;
-      ctx.translate(h.x, h.y);
-      ctx.scale(h.size / 20, h.size / 20);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(-10, -10, -15, 10, 0, 20);
-      ctx.bezierCurveTo(15, 10, 10, -10, 0, 0);
-      ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
-      ctx.fill();
-      ctx.restore();
-
-      h.y -= h.speed;
-      if (h.y < -30) {
-        h.y = canvas.height + Math.random() * 100;
-        h.x = Math.random() * canvas.width;
-        h.size = 10 + Math.random() * 20;
-        h.alpha = 0.5 + Math.random() * 0.5;
-      }
-    });
-    ctx.globalAlpha = 1.0;
-  }
-
-  function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawBackgroundStars();
-    drawHearts();
-
-    for (let l of letters) {
-      let perspectiveX = (l.z * Math.sin(angleX)) + (l.x - canvas.width/2) * Math.cos(angleX);
-      let perspectiveY = (l.z * Math.sin(angleY)) + (l.y - canvas.height/2) * Math.cos(angleY);
-
-      const scale = 1 / l.depth;
-      const glow = 80 / l.depth;
-
-      const drawX = canvas.width / 2 + perspectiveX;
-      const drawY = canvas.height / 2 + perspectiveY;
-
-      ctx.save();
-      ctx.translate(drawX, drawY);
-      ctx.scale(scale, scale);
-
-      ctx.shadowColor = "rgba(255, 105, 180, 1)";
-      ctx.shadowBlur = glow;
-      ctx.font = `bold 36px 'Segoe UI', sans-serif`;
-      ctx.fillStyle = "rgba(255, 105, 180, 0.95)";
-      ctx.textAlign = "center";
-      ctx.fillText(l.text, 0, 0);
-      ctx.restore();
-
-      l.y += l.speed / l.depth;
-      if (l.y > canvas.height + 50) {
-        l.y = -50;
-        l.x = Math.random() * canvas.width;
-        l.z = Math.random() * 600 - 300;
-        l.depth = Math.random() * 1.2 + 0.4;
-        l.text = phrases[Math.floor(Math.random() * phrases.length)];
-      }
-    }
-
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-
-  // Điều khiển góc nhìn mượt
-  let isDragging = false;
-  let lastX = 0, lastY = 0;
-
-  function handleMove(x, y) {
-    let dx = x - lastX;
-    let dy = y - lastY;
-    angleX += dx * 0.0025; // trái phải
-    angleY += dy * 0.0025; // lên xuống
-    lastX = x;
-    lastY = y;
-  }
-
-  canvas.addEventListener("mousedown", e => {
-    isDragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  });
-
-  canvas.addEventListener("mousemove", e => {
-    if (isDragging) handleMove(e.clientX, e.clientY);
-  });
-
-  canvas.addEventListener("mouseup", () => isDragging = false);
-  canvas.addEventListener("mouseleave", () => isDragging = false);
-
-  canvas.addEventListener("touchstart", e => {
-    isDragging = true;
-    lastX = e.touches[0].clientX;
-    lastY = e.touches[0].clientY;
-  });
-
-  canvas.addEventListener("touchmove", e => {
-    if (isDragging) handleMove(e.touches[0].clientX, e.touches[0].clientY);
-  });
-
-  canvas.addEventListener("touchend", () => isDragging = false);
-  canvas.addEventListener("touchcancel", () => isDragging = false);
-
-  window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
+});
 </script>
 </body>
 </html>
