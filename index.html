@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Chữ Rơi 3D Dễ Thương</title>
+  <title>Gửi bạn xinh đẹp</title>
   <style>
     html, body {
       margin: 0;
@@ -10,7 +10,6 @@
       background: #000;
       height: 100%;
     }
-
     canvas {
       display: block;
     }
@@ -27,29 +26,24 @@
   canvas.height = window.innerHeight;
 
   const phrases = [
-    "Thư siêu xinh đẹp 💖", "Bạn là tia nắng ✨", "Luôn vui vẻ nhé 🌸",
-    "Dễ thương hết phần thiên hạ 💕", "Món quà nhỏ cho bạn 💌",
-    "Cười lên nào 😄", "Chúc bạn một ngày thật đẹp 🦋",
-    "Bạn là duy nhất 🌟", "Trái tim hồng 💗", "Siêu cấp dễ thương 🌈",
-    "Không gì sánh bằng 💫", "Ngọt ngào như kẹo 🍬", "Tỏa sáng như sao 🌠",
-    "Thế giới cần bạn 💝", "Chúc bạn luôn hạnh phúc 🌷", "Bạn là lý do để mỉm cười 😊",
-    "Yêu đời nha 😘", "Tỏa sáng lung linh 💎", "Mãi mãi xinh đẹp 💓",
-    "Bí ẩn như ánh trăng 🌙", "Ngọt như trà sữa 🧋", "Lấp lánh như ngôi sao ⭐",
-    "Chói lóa như ánh mặt trời ☀️", "Hồng hào như trái tim 💘",
-    "Bay cao như mây trắng ☁️", "Bạn là phép màu ✨", "Gửi bạn điều tốt lành 🍀"
+    "Gửi bạn siêu xinh đẹp 💖",
+    "Bạn là ánh sáng của ngày hôm nay ✨",
+    "Món quà nhỏ này dành tặng bạn 🎁",
+    "Cười lên nhé, dễ thương lắm 😄",
+    "Thế giới cần nụ cười của bạn 🌸"
   ];
 
   const letters = [];
-  const count = 200;
+  const count = 50; // ít hơn
 
   for (let i = 0; i < count; i++) {
-    const depth = Math.random() * 2 + 0.5;
+    const depth = Math.random() * 1.5 + 0.3;
     letters.push({
       text: phrases[Math.floor(Math.random() * phrases.length)],
       x: Math.random() * canvas.width,
       y: Math.random() * -canvas.height,
       depth: depth,
-      baseSpeed: 1 + Math.random() * 1.5
+      baseSpeed: 2 + Math.random() * 2
     });
   }
 
@@ -62,7 +56,7 @@
       const perspectiveX = (l.depth - 1) * 200 * Math.sin(viewAngle);
       const scale = 1 / l.depth;
       const speed = l.baseSpeed / l.depth;
-      const glow = 30 / l.depth;
+      const glow = 40 / l.depth;
 
       const drawX = l.x + perspectiveX;
       const drawY = l.y;
@@ -84,9 +78,9 @@
       if (l.y > canvas.height + 50) {
         l.y = -50;
         l.x = Math.random() * canvas.width;
-        l.depth = Math.random() * 2 + 0.5;
+        l.depth = Math.random() * 1.5 + 0.3;
         l.text = phrases[Math.floor(Math.random() * phrases.length)];
-        l.baseSpeed = 1 + Math.random() * 1.5;
+        l.baseSpeed = 2 + Math.random() * 2;
       }
     });
 
@@ -95,8 +89,14 @@
 
   draw();
 
-  // Điều khiển góc nhìn
+  // Góc nhìn chuột / cảm ứng
   let isDragging = false, lastX = 0;
+
+  function handleMove(x) {
+    let dx = x - lastX;
+    viewAngle += dx * 0.002;
+    lastX = x;
+  }
 
   canvas.addEventListener("mousedown", e => {
     isDragging = true;
@@ -104,26 +104,19 @@
   });
 
   canvas.addEventListener("mousemove", e => {
-    if (!isDragging) return;
-    let dx = e.clientX - lastX;
-    viewAngle += dx * 0.002;
-    lastX = e.clientX;
+    if (isDragging) handleMove(e.clientX);
   });
 
   canvas.addEventListener("mouseup", () => isDragging = false);
   canvas.addEventListener("mouseleave", () => isDragging = false);
 
-  // Điều khiển cảm ứng
   canvas.addEventListener("touchstart", e => {
     isDragging = true;
     lastX = e.touches[0].clientX;
   });
 
   canvas.addEventListener("touchmove", e => {
-    if (!isDragging) return;
-    let dx = e.touches[0].clientX - lastX;
-    viewAngle += dx * 0.002;
-    lastX = e.touches[0].clientX;
+    if (isDragging) handleMove(e.touches[0].clientX);
   });
 
   canvas.addEventListener("touchend", () => isDragging = false);
