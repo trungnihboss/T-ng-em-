@@ -51,7 +51,8 @@
     const z = radius * Math.cos(phi);
     const word = phrases[Math.floor(Math.random() * phrases.length)];
 
-    dots.push({ x, y, z, word, speed: 0.5 + Math.random() * 1.5 });
+    // Chỉnh tốc độ rơi CHẬM HƠN
+    dots.push({ x, y, z, word, speed: 0.1 + Math.random() * 0.4 });
   }
 
   function project(x, y, z) {
@@ -83,11 +84,9 @@
     for (let i = 0; i < dots.length; i++) {
       let p = dots[i];
 
-      // Rơi từ từ (theo hướng y)
       p.y += p.speed;
       if (p.y > radius) p.y = -radius;
 
-      // Xoay toàn cầu
       p = rotateX3D(p, angleX);
       p = rotateY3D(p, angleY);
       dots[i] = p;
@@ -108,7 +107,7 @@
 
   render();
 
-  // Điều khiển xoay bằng chuột hoặc chạm
+  // Góc nhìn có thể xoay
   let isDragging = false, lastX, lastY;
 
   canvas.addEventListener("mousedown", (e) => {
@@ -129,7 +128,6 @@
 
   canvas.addEventListener("mouseup", () => isDragging = false);
 
-  // Cho cảm ứng
   canvas.addEventListener("touchstart", (e) => {
     isDragging = true;
     lastX = e.touches[0].clientX;
