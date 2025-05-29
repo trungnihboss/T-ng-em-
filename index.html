@@ -2,68 +2,72 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Gửi em 💖</title>
+  <title>Gửi bạn thư xinh gái 💖</title>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      color: white;
+      background: radial-gradient(ellipse at center, #000 0%, #111 100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
       overflow: hidden;
-    }
-
-    .container {
+      height: 100vh;
       perspective: 1000px;
-      margin-top: 100px;
     }
 
-    .card {
-      background: linear-gradient(145deg, #ff99cc, #ff66b2);
-      padding: 40px;
-      border-radius: 20px;
-      display: inline-block;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-      transform: rotateY(0deg);
-      transition: transform 0.8s ease;
+    .falling {
+      position: absolute;
+      top: -60px;
+      animation: fall linear infinite;
+      white-space: nowrap;
+      opacity: 0.9;
     }
 
-    .card:hover {
-      transform: rotateY(15deg) rotateX(5deg);
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+      }
     }
 
-    h1 {
-      font-size: 48px;
-      color: #fff;
-      margin-bottom: 20px;
-      text-shadow: 0 0 15px #ff80ab;
-    }
-
-    h2 {
+    .shiny {
       font-size: 28px;
-      color: #fffde7;
-      text-shadow: 0 0 10px #ffccf9;
-    }
-
-    .heart {
-      font-size: 48px;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); color: #ffb3c6; }
-      50% { transform: scale(1.2); color: #ff1a75; }
+      font-weight: bold;
+      text-shadow:
+        0 0 5px #ff99cc,
+        0 0 10px #ff66b2,
+        0 0 20px #ff33a6,
+        0 0 40px #ff1a8c;
+      color: #fff0f5;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="heart">💖</div>
-      <h1>Gửi em Trần Anh Thư xinh gái</h1>
-      <h2>Một chút ngọt ngào từ anh 🥰</h2>
-    </div>
-  </div>
+
+  <script>
+    const items = [
+      "💖", "🎁", "🌸", "✨", "💕", "💘",
+      "<span class='shiny'>Gửi bạn thư xinh gái 💌</span>",
+      "<span class='shiny'>Siêu dễ thương 💖 và món quà nhỏ 🎁</span>"
+    ];
+
+    const num = 40;
+
+    for (let i = 0; i < num; i++) {
+      const el = document.createElement("div");
+      el.classList.add("falling");
+
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.animationDuration = 3 + Math.random() * 3 + "s";
+      el.style.fontSize = 20 + Math.random() * 20 + "px";
+
+      const randomItem = items[Math.floor(Math.random() * items.length)];
+      el.innerHTML = randomItem;
+
+      document.body.appendChild(el);
+    }
+  </script>
 </body>
 </html>
