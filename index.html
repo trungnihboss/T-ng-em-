@@ -2,11 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quà tặng bạn Thư xinh 💖</title>
+  <title>Quà tặng bạn Thư xinh đẹp 💖</title>
   <style>
     body {
       margin: 0;
-      background: radial-gradient(circle, #111 0%, #000 100%);
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
       overflow: hidden;
       height: 100vh;
       perspective: 1000px;
@@ -18,7 +18,7 @@
       top: -60px;
       white-space: nowrap;
       animation: fall linear infinite;
-      transform: translateZ(0); /* tạo cảm giác 3D */
+      transform-style: preserve-3d;
     }
 
     @keyframes fall {
@@ -33,7 +33,6 @@
     }
 
     .shiny {
-      font-size: 30px;
       font-weight: bold;
       color: #fff;
       text-shadow:
@@ -46,33 +45,43 @@
 </head>
 <body>
 
-  <script>
-    const phrases = [
-      "Gửi bạn Thư xinh đẹp 💌",
-      "Món quà nhỏ 🎁",
-      "Dễ thương hết cỡ 💖",
-      "Tỏa sáng lung linh ✨",
-      "Đáng yêu vô cực 💕",
-      "Thư siêu xinh đẹp 💓",
-      "Chúc bạn luôn vui vẻ 🌸",
-      "Yêu đời như hoa nở 🌼",
-      "Bạn là điều tuyệt vời nhất 🌟"
-    ];
+<script>
+  const phrases = [
+    "Gửi bạn Thư xinh đẹp 💌",
+    "Món quà nhỏ 🎁",
+    "Dễ thương hết cỡ 💖",
+    "Tỏa sáng lung linh ✨",
+    "Đáng yêu vô cực 💕",
+    "Thư siêu xinh đẹp 💓",
+    "Chúc bạn luôn vui vẻ 🌸",
+    "Yêu đời như hoa nở 🌼",
+    "Bạn là điều tuyệt vời nhất 🌟"
+  ];
 
-    const count = 80;
+  const total = 90;
+  const layers = [
+    { depth: 100, scale: 0.6, amount: 20, speed: 10 },  // Xa: nhỏ, ít, chậm
+    { depth: 50, scale: 1.0, amount: 50, speed: 6 },   // Trung: nhiều, vừa
+    { depth: 10, scale: 1.5, amount: 20, speed: 3 }    // Gần: to, ít, nhanh
+  ];
 
-    for (let i = 0; i < count; i++) {
+  layers.forEach(layer => {
+    for (let i = 0; i < layer.amount; i++) {
       const el = document.createElement("div");
       el.className = "falling shiny";
       el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
-      el.style.left = Math.random() * 100 + "vw";
-      el.style.animationDuration = 3 + Math.random() * 4 + "s";
-      el.style.fontSize = 28 + Math.random() * 10 + "px";
-      el.style.animationDelay = Math.random() * 5 + "s";
+      const left = Math.random() * 100;
+      el.style.left = `${left}vw`;
+      el.style.fontSize = `${24 * layer.scale + Math.random() * 10}px`;
+      el.style.animationDuration = `${layer.speed + Math.random() * 2}s`;
+      el.style.animationDelay = `${Math.random() * 5}s`;
+      el.style.transform = `translateZ(-${layer.depth}px)`;
 
       document.body.appendChild(el);
     }
-  </script>
+  });
+</script>
+
 </body>
 </html>
