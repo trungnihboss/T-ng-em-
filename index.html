@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Góc nhìn 3D: Thư siêu xinh đẹp 💖</title>
+  <title>Gửi bạn Thư siêu xinh đẹp 💖</title>
   <style>
     body {
       margin: 0;
@@ -10,14 +10,15 @@
       overflow: hidden;
       height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      perspective: 1200px; /* Cho góc nhìn sâu hơn */
+      perspective: 1200px;
+      cursor: grab;
     }
 
     .wrapper {
       width: 100vw;
       height: 100vh;
       transform-style: preserve-3d;
-      transform: rotateX(10deg) rotateY(10deg); /* Điều chỉnh góc nhìn ở đây */
+      transition: transform 0.1s linear;
     }
 
     .falling {
@@ -56,15 +57,14 @@
 
 <script>
   const phrases = [
-    "Gửi bạn Thư xinh đẹp 💌",
+    "Gửi bạn Thư siêu xinh đẹp 💖",
     "Món quà nhỏ 🎁",
-    "Dễ thương hết cỡ 💖",
+    "Dễ thương hết cỡ 💕",
     "Tỏa sáng lung linh ✨",
-    "Đáng yêu vô cực 💕",
-    "Thư siêu xinh đẹp 💓",
+    "Bạn là điều tuyệt vời nhất 🌟",
     "Chúc bạn luôn vui vẻ 🌸",
-    "Yêu đời như hoa nở 🌼",
-    "Bạn là điều tuyệt vời nhất 🌟"
+    "Thư siêu cute 🐰",
+    "Thư xinh nhất vũ trụ 💓"
   ];
 
   const layers = [
@@ -83,7 +83,7 @@
       el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
       const left = Math.random() * 100;
-      const rotateZ = (Math.random() - 0.5) * 30; // Nghiêng ngang
+      const rotateZ = (Math.random() - 0.5) * 30; // Nghiêng chữ nhẹ
       el.style.left = `${left}vw`;
       el.style.fontSize = `${24 * layer.scale + Math.random() * 10}px`;
       el.style.animationDuration = `${layer.speed + Math.random() * 2}s`;
@@ -97,13 +97,41 @@
     }
   });
 
-  // 🎛 Tuỳ chọn chỉnh góc nhìn
-  // Xoay tự động nhẹ nhàng theo thời gian (tuỳ thích)
-  let angle = 0;
-  setInterval(() => {
-    angle += 0.2;
-    wrapper.style.transform = `rotateX(10deg) rotateY(${angle}deg)`;
-  }, 50);
+  // 🌟 Điều khiển góc nhìn bằng chạm kéo (touch)
+  let rotateX = 10;
+  let rotateY = 10;
+  let lastX, lastY;
+  let isTouching = false;
+
+  document.addEventListener("touchstart", (e) => {
+    isTouching = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  });
+
+  document.addEventListener("touchmove", (e) => {
+    if (!isTouching) return;
+
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+
+    const dx = currentX - lastX;
+    const dy = currentY - lastY;
+
+    rotateY += dx * 0.3;
+    rotateX -= dy * 0.3;
+
+    rotateX = Math.max(-80, Math.min(80, rotateX));
+
+    wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+    lastX = currentX;
+    lastY = currentY;
+  });
+
+  document.addEventListener("touchend", () => {
+    isTouching = false;
+  });
 </script>
 
 </body>
