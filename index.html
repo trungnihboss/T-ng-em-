@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Gửi bạn siêu xinh đẹp 💖</title>
   <style>
     html, body {
@@ -25,7 +25,7 @@
   canvas.height = window.innerHeight;
 
   const stars = [];
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 300; i++) {
     stars.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -43,16 +43,15 @@
   ];
 
   const letters = [];
-  const count = 50;
-
+  const count = 200;
   for (let i = 0; i < count; i++) {
-    const depth = Math.random() * 1.5 + 0.3;
     letters.push({
       text: phrases[Math.floor(Math.random() * phrases.length)],
       x: Math.random() * canvas.width,
       y: Math.random() * -canvas.height,
-      depth: depth,
-      baseSpeed: 2 + Math.random() * 2
+      z: Math.random() * 600 - 300,
+      depth: Math.random() * 1.2 + 0.4,
+      speed: 2 + Math.random() * 2
     });
   }
 
@@ -67,7 +66,8 @@
     });
   }
 
-  let viewAngle = 0;
+  let angleX = 0;
+  let angleY = 0;
 
   function drawBackgroundStars() {
     for (let star of stars) {
@@ -86,7 +86,6 @@
       ctx.globalAlpha = h.alpha;
       ctx.translate(h.x, h.y);
       ctx.scale(h.size / 20, h.size / 20);
-
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.bezierCurveTo(-10, -10, -15, 10, 0, 20);
@@ -113,14 +112,15 @@
     drawBackgroundStars();
     drawHearts();
 
-    letters.forEach(l => {
-      const perspectiveX = (l.depth - 1) * 200 * Math.sin(viewAngle);
+    for (let l of letters) {
+      let perspectiveX = (l.z * Math.sin(angleX)) + (l.x - canvas.width/2) * Math.cos(angleX);
+      let perspectiveY = (l.z * Math.sin(angleY)) + (l.y - canvas.height/2) * Math.cos(angleY);
+
       const scale = 1 / l.depth;
-      const speed = l.baseSpeed / l.depth;
       const glow = 80 / l.depth;
 
-      const drawX = l.x + perspectiveX;
-      const drawY = l.y;
+      const drawX = canvas.width / 2 + perspectiveX;
+      const drawY = canvas.height / 2 + perspectiveY;
 
       ctx.save();
       ctx.translate(drawX, drawY);
@@ -128,44 +128,48 @@
 
       ctx.shadowColor = "rgba(255, 105, 180, 1)";
       ctx.shadowBlur = glow;
-
       ctx.font = `bold 36px 'Segoe UI', sans-serif`;
-      ctx.fillStyle = "rgba(255, 105, 180, 0.95)"; // màu hồng sáng
+      ctx.fillStyle = "rgba(255, 105, 180, 0.95)";
       ctx.textAlign = "center";
       ctx.fillText(l.text, 0, 0);
       ctx.restore();
 
-      l.y += speed;
+      l.y += l.speed / l.depth;
       if (l.y > canvas.height + 50) {
         l.y = -50;
         l.x = Math.random() * canvas.width;
-        l.depth = Math.random() * 1.5 + 0.3;
+        l.z = Math.random() * 600 - 300;
+        l.depth = Math.random() * 1.2 + 0.4;
         l.text = phrases[Math.floor(Math.random() * phrases.length)];
-        l.baseSpeed = 2 + Math.random() * 2;
       }
-    });
+    }
 
     requestAnimationFrame(draw);
   }
 
   draw();
 
-  // Điều khiển góc nhìn
-  let isDragging = false, lastX = 0;
+  // Điều khiển góc nhìn mượt
+  let isDragging = false;
+  let lastX = 0, lastY = 0;
 
-  function handleMove(x) {
+  function handleMove(x, y) {
     let dx = x - lastX;
-    viewAngle += dx * 0.002;
+    let dy = y - lastY;
+    angleX += dx * 0.0025; // trái phải
+    angleY += dy * 0.0025; // lên xuống
     lastX = x;
+    lastY = y;
   }
 
   canvas.addEventListener("mousedown", e => {
     isDragging = true;
     lastX = e.clientX;
+    lastY = e.clientY;
   });
 
   canvas.addEventListener("mousemove", e => {
-    if (isDragging) handleMove(e.clientX);
+    if (isDragging) handleMove(e.clientX, e.clientY);
   });
 
   canvas.addEventListener("mouseup", () => isDragging = false);
@@ -174,10 +178,11 @@
   canvas.addEventListener("touchstart", e => {
     isDragging = true;
     lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
   });
 
   canvas.addEventListener("touchmove", e => {
-    if (isDragging) handleMove(e.touches[0].clientX);
+    if (isDragging) handleMove(e.touches[0].clientX, e.touches[0].clientY);
   });
 
   canvas.addEventListener("touchend", () => isDragging = false);
