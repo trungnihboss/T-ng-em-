@@ -6,41 +6,41 @@
   <style>
     body {
       margin: 0;
-      background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
+      background: radial-gradient(circle, #111 0%, #000 100%);
       overflow: hidden;
       height: 100vh;
-      perspective: 800px;
+      perspective: 1000px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .falling {
       position: absolute;
       top: -60px;
-      animation: fall linear infinite;
       white-space: nowrap;
-      transform-style: preserve-3d;
+      animation: fall linear infinite;
+      transform: translateZ(0); /* tạo cảm giác 3D */
     }
 
     @keyframes fall {
       0% {
-        transform: translateY(-100px) rotateY(0deg);
+        transform: translateY(-100px);
         opacity: 1;
       }
       100% {
-        transform: translateY(110vh) rotateY(360deg);
-        opacity: 0;
+        transform: translateY(110vh);
+        opacity: 0.3;
       }
     }
 
     .shiny {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: bold;
       color: #fff;
       text-shadow:
         0 0 6px #ff99cc,
         0 0 12px #ff66b2,
-        0 0 24px #ff33a6,
-        0 0 48px #ff1a8c;
+        0 0 20px #ff33a6,
+        0 0 40px #ff1a8c;
     }
   </style>
 </head>
@@ -53,23 +53,23 @@
       "Dễ thương hết cỡ 💖",
       "Tỏa sáng lung linh ✨",
       "Đáng yêu vô cực 💕",
-      "Thư siêu xinh đẹp 💓",  // ✅ Đã thay đổi ở đây
+      "Thư siêu xinh đẹp 💓",
       "Chúc bạn luôn vui vẻ 🌸",
       "Yêu đời như hoa nở 🌼",
       "Bạn là điều tuyệt vời nhất 🌟"
     ];
 
-    const count = 60;
+    const count = 80;
 
     for (let i = 0; i < count; i++) {
       const el = document.createElement("div");
       el.className = "falling shiny";
-
       el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
       el.style.left = Math.random() * 100 + "vw";
       el.style.animationDuration = 3 + Math.random() * 4 + "s";
       el.style.fontSize = 28 + Math.random() * 10 + "px";
+      el.style.animationDelay = Math.random() * 5 + "s";
 
       document.body.appendChild(el);
     }
