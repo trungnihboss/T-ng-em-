@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Gửi bạn siêu xinh đẹp ✨</title>
+  <title>Gửi bạn siêu xinh đẹp 💖</title>
   <style>
     html, body {
       margin: 0;
@@ -56,6 +56,17 @@
     });
   }
 
+  const hearts = [];
+  for (let i = 0; i < 30; i++) {
+    hearts.push({
+      x: Math.random() * canvas.width,
+      y: canvas.height + Math.random() * canvas.height,
+      size: 10 + Math.random() * 20,
+      speed: 0.5 + Math.random(),
+      alpha: 0.5 + Math.random() * 0.5
+    });
+  }
+
   let viewAngle = 0;
 
   function drawBackgroundStars() {
@@ -69,19 +80,44 @@
     ctx.globalAlpha = 1.0;
   }
 
+  function drawHearts() {
+    hearts.forEach(h => {
+      ctx.save();
+      ctx.globalAlpha = h.alpha;
+      ctx.translate(h.x, h.y);
+      ctx.scale(h.size / 20, h.size / 20);
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-10, -10, -15, 10, 0, 20);
+      ctx.bezierCurveTo(15, 10, 10, -10, 0, 0);
+      ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
+      ctx.fill();
+      ctx.restore();
+
+      h.y -= h.speed;
+      if (h.y < -30) {
+        h.y = canvas.height + Math.random() * 100;
+        h.x = Math.random() * canvas.width;
+        h.size = 10 + Math.random() * 20;
+        h.alpha = 0.5 + Math.random() * 0.5;
+      }
+    });
+    ctx.globalAlpha = 1.0;
+  }
+
   function draw() {
-    // Nền
     ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Sao
     drawBackgroundStars();
+    drawHearts();
 
     letters.forEach(l => {
       const perspectiveX = (l.depth - 1) * 200 * Math.sin(viewAngle);
       const scale = 1 / l.depth;
       const speed = l.baseSpeed / l.depth;
-      const glow = 70 / l.depth;
+      const glow = 80 / l.depth;
 
       const drawX = l.x + perspectiveX;
       const drawY = l.y;
@@ -90,11 +126,11 @@
       ctx.translate(drawX, drawY);
       ctx.scale(scale, scale);
 
-      ctx.shadowColor = "rgba(255, 255, 200, 1)";
+      ctx.shadowColor = "rgba(255, 105, 180, 1)";
       ctx.shadowBlur = glow;
 
-      ctx.font = `bold 34px 'Segoe UI', sans-serif`;
-      ctx.fillStyle = "rgba(255, 240, 200, 0.97)";
+      ctx.font = `bold 36px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = "rgba(255, 105, 180, 0.95)"; // màu hồng sáng
       ctx.textAlign = "center";
       ctx.fillText(l.text, 0, 0);
       ctx.restore();
@@ -114,7 +150,7 @@
 
   draw();
 
-  // Góc nhìn chuột / cảm ứng
+  // Điều khiển góc nhìn
   let isDragging = false, lastX = 0;
 
   function handleMove(x) {
