@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Không gian 3D cho Thư 💖</title>
+  <meta charset="UTF-8">
+  <title>Thế giới chữ 3D của Thư 💖</title>
   <style>
     html, body {
       margin: 0;
-      padding: 0;
       overflow: hidden;
       height: 100%;
-      background: radial-gradient(circle, #111, #000);
-      font-family: sans-serif;
+      background: radial-gradient(ellipse at center, #000, #111);
       perspective: 1000px;
       touch-action: none;
     }
 
-    .scene {
+    .world {
       width: 100vw;
       height: 100vh;
       transform-style: preserve-3d;
@@ -25,101 +23,98 @@
 
     .word {
       position: absolute;
-      top: 0;
-      left: 0;
-      font-size: 2rem;
-      font-weight: bold;
       color: white;
+      font-weight: bold;
+      font-size: 2rem;
       text-shadow:
         0 0 4px #ff99cc,
         0 0 12px #ff66cc,
         0 0 24px #ff33cc;
-      animation: fall linear infinite;
-      white-space: nowrap;
+      transform-style: preserve-3d;
+      animation: float 10s infinite linear;
     }
 
-    @keyframes fall {
-      0% {
-        transform: translateY(-100px);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(120vh);
-        opacity: 0.2;
-      }
+    @keyframes float {
+      0%   { transform: translateY(0px); opacity: 1; }
+      50%  { transform: translateY(20px); opacity: 0.7; }
+      100% { transform: translateY(0px); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-<div class="scene" id="scene"></div>
+<div class="world" id="world"></div>
 
 <script>
-  const scene = document.getElementById('scene');
-
   const phrases = [
-    "Gửi bạn Thư siêu xinh đẹp 💖",
+    "Thư siêu xinh đẹp 💖",
     "Món quà nhỏ 🎁",
-    "Dễ thương vô cực 🌸",
-    "Chúc ngày vui tươi 🌞",
-    "Tỏa sáng như ngôi sao ✨",
-    "Thư cute số 1 🐰",
-    "Bạn là nhất 💕",
-    "Lấp lánh giữa trời đêm 🌟"
+    "Lấp lánh ✨",
+    "Bạn là mặt trời 🌞",
+    "Cute vô cực 🐰",
+    "Trái tim ngọt ngào 💓",
+    "Ngôi sao trong đêm 🌟",
+    "Thế giới của bạn 🌍"
   ];
 
-  const count = 80;
+  const world = document.getElementById('world');
+
+  // Tạo nhiều dòng chữ phân bố khắp không gian 3D
+  const count = 100;
 
   for (let i = 0; i < count; i++) {
     const word = document.createElement('div');
     word.className = 'word';
-    word.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+    word.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
-    const x = Math.random() * window.innerWidth;
-    const z = Math.random() * -1000; // khoảng cách chiều sâu
-    const delay = Math.random() * 5;
-    const duration = 4 + Math.random() * 6;
+    const x = (Math.random() - 0.5) * 2000;
+    const y = (Math.random() - 0.5) * 1200;
+    const z = (Math.random() - 0.5) * 2000;
+    const rotate = Math.random() * 360;
 
-    word.style.left = `${x}px`;
-    word.style.transform = `translateZ(${z}px)`;
-    word.style.animationDuration = `${duration}s`;
-    word.style.animationDelay = `${delay}s`;
+    word.style.transform = `
+      translate3d(${x}px, ${y}px, ${z}px)
+      rotateY(${rotate}deg)
+      rotateX(${rotate}deg)
+    `;
 
-    scene.appendChild(word);
+    world.appendChild(word);
   }
 
-  // Điều khiển góc nhìn bằng cảm ứng chạm
+  // Điều khiển góc nhìn bằng chạm kéo
   let rotateX = 0;
   let rotateY = 0;
   let lastX, lastY;
-  let isTouching = false;
+  let isDragging = false;
 
   document.addEventListener('touchstart', (e) => {
-    isTouching = true;
+    isDragging = true;
     lastX = e.touches[0].clientX;
     lastY = e.touches[0].clientY;
   });
 
   document.addEventListener('touchmove', (e) => {
-    if (!isTouching) return;
+    if (!isDragging) return;
+
     const currentX = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
+
     const dx = currentX - lastX;
     const dy = currentY - lastY;
 
     rotateY += dx * 0.2;
     rotateX -= dy * 0.2;
 
-    rotateX = Math.max(-45, Math.min(45, rotateX));
+    rotateX = Math.max(-90, Math.min(90, rotateX));
 
-    scene.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    world.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
     lastX = currentX;
     lastY = currentY;
   });
 
   document.addEventListener('touchend', () => {
-    isTouching = false;
+    isDragging = false;
   });
 </script>
 
