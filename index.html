@@ -2,13 +2,13 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Gửi bạn xinh đẹp</title>
+  <title>Gửi bạn siêu xinh đẹp ✨</title>
   <style>
     html, body {
       margin: 0;
       overflow: hidden;
-      background: #000;
       height: 100%;
+      background: radial-gradient(ellipse at center, #0b0c2a 0%, #000000 100%);
     }
     canvas {
       display: block;
@@ -21,20 +21,29 @@
 <script>
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
+  const stars = [];
+  for (let i = 0; i < 400; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5,
+      opacity: Math.random()
+    });
+  }
+
   const phrases = [
     "Gửi bạn siêu xinh đẹp 💖",
-    "Bạn là ánh sáng của ngày hôm nay ✨",
-    "Món quà nhỏ này dành tặng bạn 🎁",
-    "Cười lên nhé, dễ thương lắm 😄",
-    "Thế giới cần nụ cười của bạn 🌸"
+    "Bạn là ánh sáng ✨",
+    "Một món quà nhỏ 🎁",
+    "Cười lên nha 😄",
+    "Bạn là điều dễ thương nhất 🌟"
   ];
 
   const letters = [];
-  const count = 50; // ít hơn
+  const count = 50;
 
   for (let i = 0; i < count; i++) {
     const depth = Math.random() * 1.5 + 0.3;
@@ -49,14 +58,30 @@
 
   let viewAngle = 0;
 
+  function drawBackgroundStars() {
+    for (let star of stars) {
+      ctx.beginPath();
+      ctx.globalAlpha = star.opacity;
+      ctx.fillStyle = "white";
+      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1.0;
+  }
+
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Nền
+    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Sao
+    drawBackgroundStars();
 
     letters.forEach(l => {
       const perspectiveX = (l.depth - 1) * 200 * Math.sin(viewAngle);
       const scale = 1 / l.depth;
       const speed = l.baseSpeed / l.depth;
-      const glow = 40 / l.depth;
+      const glow = 70 / l.depth;
 
       const drawX = l.x + perspectiveX;
       const drawY = l.y;
@@ -65,11 +90,11 @@
       ctx.translate(drawX, drawY);
       ctx.scale(scale, scale);
 
-      ctx.shadowColor = "rgba(255, 105, 180, 1)";
+      ctx.shadowColor = "rgba(255, 255, 200, 1)";
       ctx.shadowBlur = glow;
 
-      ctx.font = `30px sans-serif`;
-      ctx.fillStyle = "rgba(255, 182, 193, 0.95)";
+      ctx.font = `bold 34px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = "rgba(255, 240, 200, 0.97)";
       ctx.textAlign = "center";
       ctx.fillText(l.text, 0, 0);
       ctx.restore();
