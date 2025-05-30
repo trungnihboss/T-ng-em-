@@ -17,7 +17,6 @@
 </head>
 <body>
 <canvas id="canvas"></canvas>
-
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -26,34 +25,32 @@ canvas.height = window.innerHeight;
 
 const phrases = [
   "Gửi bạn siêu xinh đẹp 💖",
-  "Anh.Trung<3Anh.Thư",
-  "Bạn là ánh sáng ✨",
-  "Cười lên nha 😄",
-  "Bạn là điều dễ thương nhất 🌟"
+  "ひとめぼれ😍",
+  "Dễ Thương 🥰🥰",
+  "我喜欢你😘",
+  "You are like an angel that saved my soul🫣",
+  "Hẹ Hẹ",
+  "💘"
+  "❤️‍🩹"
+  "🫶"
+  "🧡"
+  "❤️"
 ];
 
-// ⭐ Chia tỷ lệ chữ từng lớp
 const layers = {
   near: [],
   middle: [],
   far: []
 };
 
-const total = 30; // tổng số chữ
+const total = 120;
 for (let i = 0; i < total; i++) {
-  const layerName =
-    i < total * 0.15 ? "near" :
-    i < total * 0.45 ? "middle" : "far";
-
-  const depth = layerName === "near" ? 0.5 :
-                layerName === "middle" ? 1.0 : 2.5;
-  const z = layerName === "near" ? 150 :
-            layerName === "middle" ? 0 :
-            -400;
-
+  const layerName = i < total * 0.2 ? "near" : i < total * 0.6 ? "middle" : "far";
+  const z = layerName === "near" ? 100 : layerName === "middle" ? 0 : -500;
+  const depth = layerName === "near" ? 0.5 : layerName === "middle" ? 1.2 : 2.5;
   layers[layerName].push({
     text: phrases[Math.floor(Math.random() * phrases.length)],
-    x: (Math.random() - 0.5) * canvas.width * 1.5,
+    x: Math.random() * canvas.width,
     y: Math.random() * -canvas.height,
     z: z + Math.random() * 100 - 50,
     depth: depth,
@@ -61,9 +58,8 @@ for (let i = 0; i < total; i++) {
   });
 }
 
-// ⭐ Tạo bầu trời sao
 const stars = [];
-for (let i = 0; i < 200; i++) {
+for (let i = 0; i < 250; i++) {
   stars.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
@@ -74,7 +70,6 @@ for (let i = 0; i < 200; i++) {
 
 let angleX = 0, angleY = 0;
 
-// ⭐ Vẽ các ngôi sao nền
 function drawBackgroundStars() {
   for (let star of stars) {
     ctx.beginPath();
@@ -86,15 +81,27 @@ function drawBackgroundStars() {
   ctx.globalAlpha = 1.0;
 }
 
-// ⭐ Vẽ chữ từng lớp
 function drawLayer(layer, glowIntensity) {
   for (let l of layer) {
-    const perspectiveX = (l.z * Math.sin(angleX)) + (l.x) * Math.cos(angleX);
-    const perspectiveY = (l.z * Math.sin(angleY)) + (l.y) * Math.cos(angleY);
+    const cosX = Math.cos(angleX);
+    const sinX = Math.sin(angleX);
+    const cosY = Math.cos(angleY);
+    const sinY = Math.sin(angleY);
+
+    // Tọa độ xoay 3D
+    let x = l.x - canvas.width / 2;
+    let y = l.y - canvas.height / 2;
+    let z = l.z;
+
+    let dx = x * cosX - z * sinX;
+    let dz = x * sinX + z * cosX;
+    let dy = y * cosY - dz * sinY;
+    dz = y * sinY + dz * cosY;
+
+    const drawX = canvas.width / 2 + dx;
+    const drawY = canvas.height / 2 + dy;
 
     const scale = 1 / l.depth;
-    const drawX = canvas.width / 2 + perspectiveX;
-    const drawY = canvas.height / 2 + perspectiveY;
 
     ctx.save();
     ctx.translate(drawX, drawY);
@@ -110,29 +117,26 @@ function drawLayer(layer, glowIntensity) {
     l.y += l.speed / l.depth;
     if (l.y > canvas.height + 50) {
       l.y = -50;
-      l.x = (Math.random() - 0.5) * canvas.width * 1.5;
+      l.x = Math.random() * canvas.width;
       l.text = phrases[Math.floor(Math.random() * phrases.length)];
     }
   }
 }
 
 function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   drawBackgroundStars();
-  drawLayer(layers.far, 15);
-  drawLayer(layers.middle, 40);
+  drawLayer(layers.far, 20);
+  drawLayer(layers.middle, 50);
   drawLayer(layers.near, 80);
-
   requestAnimationFrame(draw);
 }
 draw();
 
-// ⭐ Điều khiển góc nhìn bằng chuột / cảm ứng
+// Điều khiển góc nhìn
 let isDragging = false;
 let lastX = 0, lastY = 0;
-
 function handleMove(x, y) {
   let dx = x - lastX;
   let dy = y - lastY;
@@ -141,7 +145,6 @@ function handleMove(x, y) {
   lastX = x;
   lastY = y;
 }
-
 canvas.addEventListener("mousedown", e => {
   isDragging = true;
   lastX = e.clientX;
@@ -162,8 +165,6 @@ canvas.addEventListener("touchmove", e => {
 });
 canvas.addEventListener("touchend", () => isDragging = false);
 canvas.addEventListener("touchcancel", () => isDragging = false);
-
-// ⭐ Cập nhật kích thước khi thay đổi màn hình
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
