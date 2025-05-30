@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Fixed Text Effect - Sparse</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; overflow: hidden;
-    background: black;
-    height: 100vh;
-    user-select: none;
-  }
-  canvas {
-    display: block;
-    background: radial-gradient(ellipse at center, #000 0%, #010010 80%, #000 100%);
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Text with Falling Hearts</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+      height: 100vh;
+      user-select: none;
+    }
+    canvas {
+      display: block;
+      background: radial-gradient(ellipse at center, #000 0%, #010010 80%, #000 100%);
+    }
+  </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
@@ -31,6 +33,12 @@
     H = window.innerHeight;
     canvas.width = W;
     canvas.height = H;
+
+    // reset vị trí trái tim khi resize
+    for (let i = 0; i < hearts.length; i++) {
+      hearts[i].x = Math.random() * W;
+      hearts[i].y = Math.random() * H;
+    }
   }
   window.addEventListener('resize', resize);
   resize();
@@ -45,6 +53,22 @@
       r: Math.random()*1.2,
       alpha: 0.3 + Math.random()*0.7,
       speed: 0.01 + Math.random()*0.02
+    });
+  }
+
+  // Falling hearts
+  const hearts = [];
+  const heartCount = 30;
+  const heartEmoji = "💖";
+  for (let i = 0; i < heartCount; i++) {
+    hearts.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: 16 + Math.random() * 10,
+      speed: 0.5 + Math.random(),
+      alpha: 0.5 + Math.random() * 0.5,
+      angle: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - 0.5) * 0.05
     });
   }
 
@@ -123,17 +147,15 @@
     }
   }
 
-  const layersCount = 3;
+  const layersCount = 4;
   const particles = [];
-
-  // Rải chữ trong vùng lớn hơn: x, y từ -150 tới +150, z theo lớp
   for(let layer=0; layer<layersCount; layer++){
-    const depthZ = -80 + layer*80; // xa dần
-    const countPerLayer = 4;  // giảm số lượng xuống còn 4 chữ mỗi lớp
+    const depthZ = -80 + layer*80;
+    const countPerLayer = 6;
     for(let i=0; i<countPerLayer; i++){
       const text = lines[(layer*countPerLayer + i) % lines.length];
       let x = -150 + Math.random()*300;
-      let y = -150 + Math.random()*300;
+      let y = -250 + Math.random()*500;
       let z = depthZ + (Math.random()*40 - 20);
       particles.push(new TextParticle(text, x, y, z, layer));
     }
@@ -162,6 +184,30 @@
       ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
       ctx.fill();
     }
+
+    // Draw falling hearts
+    for (let h of hearts) {
+      ctx.save();
+      ctx.translate(h.x, h.y);
+      ctx.rotate(h.angle);
+      ctx.globalAlpha = h.alpha;
+      ctx.font = `${h.size}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(heartEmoji, 0, 0);
+      ctx.restore();
+
+      h.y += h.speed;
+      h.angle += h.rotationSpeed;
+
+      if (h.y > H + 20) {
+        h.y = -20;
+        h.x = Math.random() * W;
+        h.alpha = 0.5 + Math.random() * 0.5;
+        h.size = 16 + Math.random() * 10;
+      }
+    }
+    ctx.globalAlpha = 1;
 
     rotX += (targetRotX - rotX)*0.1;
     rotY += (targetRotY - rotY)*0.1;
@@ -195,7 +241,6 @@
   }
 
   draw();
-
 })();
 </script>
 </body>
