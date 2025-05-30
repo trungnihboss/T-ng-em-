@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Gửi bạn siêu xinh đẹp 💖</title>
+  <title>Falling 3D Text Layers</title>
   <style>
-    html, body {
+    body {
       margin: 0;
       overflow: hidden;
-      height: 100%;
-      background: radial-gradient(ellipse at center, #0b0c2a 0%, #000000 100%);
+      background: radial-gradient(ellipse at center, #000 0%, #05001a 100%);
     }
     canvas {
       display: block;
@@ -16,149 +15,111 @@
   </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.z = 200;
 
-<script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-const phrases = [
-  "Gửi bạn siêu xinh đẹp 💖",
-  "Một món quà nhỏ 🎁",
-  "Bạn là ánh sáng ✨",
-  "Cười lên nha 😄",
-  "Bạn là điều dễ thương nhất 🌟"
-];
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
 
-// 🌟 Ba lớp: near, middle, far (giảm số lượng chữ)
-const layers = {
-  near: [],
-  middle: [],
-  far: []
-};
+    const fontLoader = new THREE.FontLoader();
+    const texts = ["1 Year Anniversary", "Lt.long♡Ha.phng", "Always by my side", "Love u in every universe", "Dành cho em tia nắng ấm"];
 
-const total = 90;
-for (let i = 0; i < total; i++) {
-  const layerName = i < total * 0.3 ? "near" : i < total * 0.6 ? "middle" : "far";
-  const depth = layerName === "near" ? 0.4 :
-                layerName === "middle" ? 1.0 : 2.2;
-  const z = layerName === "near" ? 100 :
-            layerName === "middle" ? 0 :
-            -350;
-  layers[layerName].push({
-    text: phrases[Math.floor(Math.random() * phrases.length)],
-    x: Math.random() * canvas.width,
-    y: Math.random() * -canvas.height,
-    z: z + Math.random() * 100 - 50,
-    depth: depth,
-    speed: layerName === "near" ? 3.5 : layerName === "middle" ? 2 : 1
-  });
-}
+    const createText = (text, size, zPos, speed) => {
+      fontLoader.load("https://threejs.org/examples/fonts/helvetiker_regular.typeface.json", function (font) {
+        const textGeometry = new THREE.TextGeometry(text, {
+          font: font,
+          size: size,
+          height: 1,
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff66cc });
+        const mesh = new THREE.Mesh(textGeometry, textMaterial);
 
-const stars = [];
-for (let i = 0; i < 200; i++) {
-  stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 1.5,
-    opacity: Math.random()
-  });
-}
+        mesh.position.set((Math.random() - 0.5) * 400, Math.random() * 800, zPos);
+        mesh.rotation.z = (Math.random() - 0.5) * 0.5;
+        mesh.userData = { speed };
 
-let angleX = 0, angleY = 0;
+        scene.add(mesh);
+        textMeshes.push(mesh);
+      });
+    };
 
-function drawBackgroundStars() {
-  for (let star of stars) {
-    ctx.beginPath();
-    ctx.globalAlpha = star.opacity;
-    ctx.fillStyle = "white";
-    ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1.0;
-}
+    const textMeshes = [];
+    const layerConfig = [
+      { count: 20, size: 14, z: -100, speed: 0.3 },
+      { count: 30, size: 10, z: 0, speed: 0.6 },
+      { count: 50, size: 6, z: 100, speed: 1 },
+    ];
 
-function drawLayer(layer, glowIntensity) {
-  for (let l of layer) {
-    let perspectiveX = (l.z * Math.sin(angleX)) + (l.x - canvas.width/2) * Math.cos(angleX);
-    let perspectiveY = (l.z * Math.sin(angleY)) + (l.y - canvas.height/2) * Math.cos(angleY);
+    layerConfig.forEach(layer => {
+      for (let i = 0; i < layer.count; i++) {
+        const t = texts[Math.floor(Math.random() * texts.length)];
+        createText(t, layer.size, layer.z, layer.speed);
+      }
+    });
 
-    const scale = 1 / l.depth;
-    const drawX = canvas.width / 2 + perspectiveX;
-    const drawY = canvas.height / 2 + perspectiveY;
-
-    ctx.save();
-    ctx.translate(drawX, drawY);
-    ctx.scale(scale, scale);
-    ctx.shadowColor = "rgba(255, 105, 180, 1)";
-    ctx.shadowBlur = glowIntensity / l.depth;
-    ctx.font = `bold 36px 'Segoe UI', sans-serif`;
-    ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
-    ctx.textAlign = "center";
-    ctx.fillText(l.text, 0, 0);
-    ctx.restore();
-
-    l.y += l.speed / l.depth;
-    if (l.y > canvas.height + 50) {
-      l.y = -50;
-      l.x = Math.random() * canvas.width;
-      l.text = phrases[Math.floor(Math.random() * phrases.length)];
+    // Starry background
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 2000;
+    const starVertices = [];
+    for (let i = 0; i < starCount; i++) {
+      const x = THREE.MathUtils.randFloatSpread(1000);
+      const y = THREE.MathUtils.randFloatSpread(1000);
+      const z = THREE.MathUtils.randFloatSpread(1000);
+      starVertices.push(x, y, z);
     }
-  }
-}
+    starGeometry.setAttribute("position", new THREE.Float32BufferAttribute(starVertices, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
 
-function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Heart particles
+    const heartTexture = new THREE.TextureLoader().load("https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Emoji_u2764.svg/1024px-Emoji_u2764.svg.png");
+    const heartParticles = [];
+    for (let i = 0; i < 20; i++) {
+      const spriteMaterial = new THREE.SpriteMaterial({ map: heartTexture, color: 0xff3366 });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(10, 10, 1);
+      sprite.position.set((Math.random() - 0.5) * 400, Math.random() * 800, (Math.random() - 0.5) * 200);
+      scene.add(sprite);
+      heartParticles.push(sprite);
+    }
 
-  drawBackgroundStars();
-  drawLayer(layers.far, 20);
-  drawLayer(layers.middle, 50);
-  drawLayer(layers.near, 80);
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
 
-  requestAnimationFrame(draw);
-}
-draw();
+      textMeshes.forEach(mesh => {
+        mesh.position.y -= mesh.userData.speed;
+        if (mesh.position.y < -300) {
+          mesh.position.y = 600;
+          mesh.position.x = (Math.random() - 0.5) * 400;
+        }
+      });
 
-// Góc nhìn điều khiển
-let isDragging = false;
-let lastX = 0, lastY = 0;
-function handleMove(x, y) {
-  let dx = x - lastX;
-  let dy = y - lastY;
-  angleX += dx * 0.002;
-  angleY += dy * 0.002;
-  lastX = x;
-  lastY = y;
-}
+      heartParticles.forEach(h => {
+        h.position.y -= 0.2;
+        if (h.position.y < -300) h.position.y = 400;
+      });
 
-canvas.addEventListener("mousedown", e => {
-  isDragging = true;
-  lastX = e.clientX;
-  lastY = e.clientY;
-});
-canvas.addEventListener("mousemove", e => {
-  if (isDragging) handleMove(e.clientX, e.clientY);
-});
-canvas.addEventListener("mouseup", () => isDragging = false);
-canvas.addEventListener("mouseleave", () => isDragging = false);
-canvas.addEventListener("touchstart", e => {
-  isDragging = true;
-  lastX = e.touches[0].clientX;
-  lastY = e.touches[0].clientY;
-});
-canvas.addEventListener("touchmove", e => {
-  if (isDragging) handleMove(e.touches[0].clientX, e.touches[0].clientY);
-});
-canvas.addEventListener("touchend", () => isDragging = false);
-canvas.addEventListener("touchcancel", () => isDragging = false);
+      renderer.render(scene, camera);
+    }
 
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-</script>
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
