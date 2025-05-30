@@ -15,14 +15,16 @@
   </style>
 </head>
 <body>
-  <!-- Thư viện THREE.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/FontLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/geometries/TextGeometry.js"></script>
 
   <script>
+    // Khởi tạo scene
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     camera.position.z = 60;
 
@@ -33,76 +35,94 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    const light = new THREE.PointLight(0xffffff, 1);
+    // Cải thiện ánh sáng
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
     scene.add(light);
 
     const textList = [
       "Always by my side",
       "Love u in every universe",
       "1 Year Anniversary",
-      "A.Trung<3 A.Thư"
+      "Anh Trung<3 Anh Thư",
+      "Dành cho em tia nắng ấm cùng bao cơn gió"
     ];
 
     const loader = new THREE.FontLoader();
-    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-      const textMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+    // Sử dụng font URL đáng tin cậy hơn
+    loader.load('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+      const textMaterial = new THREE.MeshPhongMaterial({
+        color: 0xff3366,
+        specular: 0xffffff,
+        shininess: 30,
         transparent: true,
         opacity: 0.9
       });
 
-      for (let i = 0; i < 300; i++) {
+      for (let i = 0; i < 100; i++) { // Giảm số lượng để tối ưu
         const message = textList[Math.floor(Math.random() * textList.length)];
         const textGeo = new THREE.TextGeometry(message, {
           font: font,
           size: 1.2,
-          height: 0.05
+          height: 0.2
         });
 
         const mesh = new THREE.Mesh(textGeo, textMaterial);
         mesh.position.set(
-          (Math.random() - 0.5) * 200,
-          (Math.random() - 0.5) * 200,
-          (Math.random() - 0.5) * 200
+          (Math.random() - 0.5) * 100,
+          (Math.random() - 0.5) * 100,
+          (Math.random() - 0.5) * 100
         );
-
-        // Giữ chữ không quay theo camera
-        mesh.lookAt(0, 0, 0);
-
+        mesh.lookAt(camera.position);
         scene.add(mesh);
       }
 
       animate();
+    }, undefined, function (error) {
+      console.error('Error loading font:', error);
     });
 
-    // Trái tim đỏ bay xung quanh
+    // Tạo trái tim
     const hearts = [];
     const heartShape = new THREE.Shape();
     heartShape.moveTo(0, 0);
-    heartShape.bezierCurveTo(0, 0, -1, -1.5, 0, -2.5);
-    heartShape.bezierCurveTo(1, -1.5, 0, 0, 0, 0);
+    heartShape.bezierCurveTo(0, 0, -2, -2, 0, -4);
+    heartShape.bezierCurveTo(2, -2, 0, 0, 0, 0);
 
-    const heartGeo = new THREE.ShapeGeometry(heartShape);
-    const heartMat = new THREE.MeshBasicMaterial({ color: 0xff3366, side: THREE.DoubleSide });
+    const heartGeo = new THREE.ExtrudeGeometry(heartShape, {
+      depth: 0.5,
+      bevelEnabled: true,
+      bevelSize: 0.1,
+      bevelThickness: 0.2
+    });
+    
+    const heartMat = new THREE.MeshPhongMaterial({ 
+      color: 0xff3366,
+      specular: 0xffaaaa,
+      shininess: 100
+    });
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 30; i++) {
       const heart = new THREE.Mesh(heartGeo, heartMat);
-      heart.scale.set(0.3, 0.3, 0.3);
+      heart.scale.set(0.5, 0.5, 0.5);
       heart.position.set(
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 150
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80
       );
       heart.velocity = new THREE.Vector3(
-        (Math.random() - 0.5) * 0.2,
-        (Math.random() - 0.5) * 0.2,
-        (Math.random() - 0.5) * 0.2
+        (Math.random() - 0.5) * 0.5,
+        (Math.random() - 0.5) * 0.5,
+        (Math.random() - 0.5) * 0.5
       );
       hearts.push(heart);
       scene.add(heart);
     }
 
-    // Resize
+    // Xử lý resize
     window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -112,12 +132,16 @@
     function animate() {
       requestAnimationFrame(animate);
 
-      // Di chuyển trái tim
       hearts.forEach(h => {
         h.position.add(h.velocity);
-        if (Math.abs(h.position.x) > 100) h.velocity.x *= -1;
-        if (Math.abs(h.position.y) > 100) h.velocity.y *= -1;
-        if (Math.abs(h.position.z) > 100) h.velocity.z *= -1;
+        // Giới hạn di chuyển và đổi hướng
+        ['x', 'y', 'z'].forEach(axis => {
+          if (Math.abs(h.position[axis]) > 50) {
+            h.velocity[axis] *= -1;
+            h.position[axis] = Math.sign(h.position[axis]) * 50;
+          }
+        });
+        h.rotation.y += 0.01;
       });
 
       controls.update();
