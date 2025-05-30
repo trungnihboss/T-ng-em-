@@ -25,53 +25,37 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const phrases = [
-  "Anh Trung<3Anh Thư",
-  "ひとめぼれ😍",
-  "Siêu xinh đẹp ✨",
-  "I think I'm in love with you💘",
-  "❤️‍🩹",
-  "❤️",
-  "💖",
-  "🧡",
-  "❤️‍🔥",
-  "💜"
+  "Anh Trung 💖 Anh Thư",
+  "Gửi bạn siêu xinh đẹp 💖",
+  "Một món quà nhỏ 🎁",
+  "Bạn là ánh sáng ✨",
+  "Cười lên nha 😄"
 ];
 
-// Khởi tạo ba lớp chữ
+// 3 lớp với tỷ lệ chữ xa/gần như yêu cầu
 const layers = {
-  near: [],   // ít
-  middle: [], // trung bình
-  far: []     // nhiều
+  near: [],
+  middle: [],
+  far: []
 };
-
-// Phân bố chữ theo lớp, tỉ lệ: near 15%, middle 35%, far 50%
-const total = 90;
+const total = 120;
 for (let i = 0; i < total; i++) {
-  let layerName;
-  if (i < total * 0.15) layerName = "near";
-  else if (i < total * 0.5) layerName = "middle";
-  else layerName = "far";
-
-  const z = layerName === "near" ? 200 :
-            layerName === "middle" ? 0 : -500;
-  const depth = layerName === "near" ? 0.4 :
-                layerName === "middle" ? 1.0 : 2.5;
-  const speed = layerName === "near" ? 3.8 :
-                layerName === "middle" ? 2.0 : 1.2;
-
+  const layerName = i < total * 0.15 ? "near" : i < total * 0.45 ? "middle" : "far";
+  const depth = layerName === "near" ? 0.4 : layerName === "middle" ? 1.0 : 2.2;
+  const z = layerName === "near" ? 100 : layerName === "middle" ? 0 : -350;
   layers[layerName].push({
     text: phrases[Math.floor(Math.random() * phrases.length)],
     x: Math.random() * canvas.width,
     y: Math.random() * -canvas.height,
     z: z + Math.random() * 100 - 50,
     depth: depth,
-    speed: speed
+    speed: layerName === "near" ? 3.5 : layerName === "middle" ? 2 : 1
   });
 }
 
-// Bầu trời sao
+// Background stars
 const stars = [];
-for (let i = 0; i < 250; i++) {
+for (let i = 0; i < 200; i++) {
   stars.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
@@ -80,11 +64,9 @@ for (let i = 0; i < 250; i++) {
   });
 }
 
-// Góc xoay không gian
 let angleX = 0, angleY = 0;
 
-// Vẽ sao nền
-function drawStars() {
+function drawBackgroundStars() {
   for (let star of stars) {
     ctx.beginPath();
     ctx.globalAlpha = star.opacity;
@@ -95,55 +77,61 @@ function drawStars() {
   ctx.globalAlpha = 1.0;
 }
 
-// Vẽ từng lớp chữ
-function drawLayer(layer, glow) {
-  for (let item of layer) {
-    let px = (item.z * Math.sin(angleX)) + (item.x - canvas.width / 2) * Math.cos(angleX);
-    let py = (item.z * Math.sin(angleY)) + (item.y - canvas.height / 2) * Math.cos(angleY);
+function drawLayer(layer, glowIntensity) {
+  for (let l of layer) {
+    // Tính vị trí dựa trên góc nhìn
+    const dx = l.x - canvas.width / 2;
+    const dy = l.y - canvas.height / 2;
+    const perspectiveX = dx * Math.cos(angleX) + l.z * Math.sin(angleX);
+    const perspectiveY = dy * Math.cos(angleY) + l.z * Math.sin(angleY);
 
-    const scale = 1 / item.depth;
-    const drawX = canvas.width / 2 + px;
-    const drawY = canvas.height / 2 + py;
+    const drawX = canvas.width / 2 + perspectiveX;
+    const drawY = canvas.height / 2 + perspectiveY;
+
+    const scale = 1 / l.depth;
 
     ctx.save();
     ctx.translate(drawX, drawY);
     ctx.scale(scale, scale);
-    ctx.shadowColor = "rgba(255,105,180,1)";
-    ctx.shadowBlur = glow / item.depth;
+
+    // Giữ phương chữ không xoay dù có góc nhìn
+    ctx.shadowColor = "rgba(255, 105, 180, 1)";
+    ctx.shadowBlur = glowIntensity / l.depth;
     ctx.font = `bold 36px 'Segoe UI', sans-serif`;
-    ctx.fillStyle = "rgba(255,105,180,0.9)";
+    ctx.fillStyle = "rgba(255, 105, 180, 0.9)";
     ctx.textAlign = "center";
-    ctx.fillText(item.text, 0, 0);
+    ctx.fillText(l.text, 0, 0);
     ctx.restore();
 
-    item.y += item.speed;
-    if (item.y > canvas.height + 60) {
-      item.y = -60;
-      item.x = Math.random() * canvas.width;
-      item.text = phrases[Math.floor(Math.random() * phrases.length)];
+    // Di chuyển rơi xuống
+    l.y += l.speed / l.depth;
+    if (l.y > canvas.height + 50) {
+      l.y = -50;
+      l.x = Math.random() * canvas.width;
+      l.text = phrases[Math.floor(Math.random() * phrases.length)];
     }
   }
 }
 
 function draw() {
-  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  drawStars();
+  drawBackgroundStars();
   drawLayer(layers.far, 20);
   drawLayer(layers.middle, 50);
-  drawLayer(layers.near, 90);
+  drawLayer(layers.near, 80);
 
   requestAnimationFrame(draw);
 }
 draw();
 
-// Xử lý xoay góc nhìn (chuột và cảm ứng)
+// Xử lý góc nhìn
 let isDragging = false;
 let lastX = 0, lastY = 0;
 function handleMove(x, y) {
-  const dx = x - lastX;
-  const dy = y - lastY;
+  let dx = x - lastX;
+  let dy = y - lastY;
   angleX += dx * 0.002;
   angleY += dy * 0.002;
   lastX = x;
@@ -169,7 +157,6 @@ canvas.addEventListener("touchmove", e => {
 });
 canvas.addEventListener("touchend", () => isDragging = false);
 canvas.addEventListener("touchcancel", () => isDragging = false);
-
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
