@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Gửi bạn siêu xinh đẹp 💖</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Falling Text</title>
   <style>
     html, body {
       margin: 0;
-      padding: 0;
       overflow: hidden;
-      background: radial-gradient(ellipse at center, #000000 0%, #0d0d2b 100%);
-      height: 100%;
+      background: black;
     }
-
     canvas {
       display: block;
     }
@@ -23,120 +21,133 @@
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-let width, height;
-let words = [];
-let pointer = { x: 0, y: 0 };
-let rotation = { x: 0, y: 0 };
+let w, h;
+let texts = [];
+let hearts = [];
+let mouse = { x: 0, y: 0 };
+let camera = { x: 0, y: 0 };
+let textList = [
+  "Always by my side", "1 Year Anniversary", "Lt.long♡Ha.phng",
+  "Love u in every universe", "Dành cho em tia nắng ấm"
+];
 
-// Resize canvas
+// Resize
 function resize() {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
 }
 window.addEventListener("resize", resize);
 resize();
 
-// Tạo ngẫu nhiên chữ
-function generateWords(count) {
-  const pool = ["Gửi bạn siêu xinh đẹp", "Bạn thật dễ thương", "Chúc bạn luôn vui", "💖", "Hồng rực rỡ"];
+// Generate text objects
+function createTexts(count = 150) {
+  texts = [];
   for (let i = 0; i < count; i++) {
-    const text = pool[Math.floor(Math.random() * pool.length)];
-    const depth = Math.random(); // 0 (gần) → 1 (xa)
-    words.push({
-      text,
-      x: (Math.random() - 0.5) * width * 2,
-      y: Math.random() * -height,
-      z: depth,
-      speed: 1 + depth * 3,
-      size: 16 + (1 - depth) * 32,
-      glow: 0.5 + (1 - depth)
+    texts.push({
+      text: textList[Math.floor(Math.random() * textList.length)],
+      x: (Math.random() - 0.5) * 1000,
+      y: Math.random() * -2000,
+      z: Math.random() * 1000,
+      size: 20 + Math.random() * 30,
+      speed: 0.5 + Math.random() * 1.5
     });
   }
 }
 
-generateWords(200);
-
-// Xử lý góc nhìn bằng chuột / cảm ứng
-function setupControls() {
-  let dragging = false;
-  let lastX, lastY;
-
-  canvas.addEventListener("mousedown", (e) => {
-    dragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  });
-  window.addEventListener("mouseup", () => dragging = false);
-  window.addEventListener("mousemove", (e) => {
-    if (dragging) {
-      rotation.y += (e.clientX - lastX) * 0.005;
-      rotation.x += (e.clientY - lastY) * 0.005;
-      lastX = e.clientX;
-      lastY = e.clientY;
-    }
-  });
-
-  canvas.addEventListener("touchstart", (e) => {
-    if (e.touches.length === 1) {
-      dragging = true;
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
-    }
-  });
-  window.addEventListener("touchend", () => dragging = false);
-  window.addEventListener("touchmove", (e) => {
-    if (dragging && e.touches.length === 1) {
-      rotation.y += (e.touches[0].clientX - lastX) * 0.005;
-      rotation.x += (e.touches[0].clientY - lastY) * 0.005;
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
-    }
-  });
-}
-setupControls();
-
-// Vẽ
-function draw() {
-  ctx.clearRect(0, 0, width, height);
-
-  for (let w of words) {
-    w.y += w.speed;
-    if (w.y > height * 1.5) {
-      w.y = -Math.random() * height;
-      w.x = (Math.random() - 0.5) * width * 2;
-    }
-
-    // Tính vị trí 3D giả lập
-    const cosY = Math.cos(rotation.y), sinY = Math.sin(rotation.y);
-    const cosX = Math.cos(rotation.x), sinX = Math.sin(rotation.x);
-
-    let x = w.x;
-    let y = w.y - height / 2;
-    let z = (1 - w.z) * 800 - 400;
-
-    // Xoay quanh trục Y
-    let dx = x * cosY - z * sinY;
-    let dz = x * sinY + z * cosY;
-
-    // Xoay quanh trục X
-    let dy = y * cosX - dz * sinX;
-    dz = y * sinX + dz * cosX;
-
-    const scale = 300 / (300 + dz);
-    const screenX = width / 2 + dx * scale;
-    const screenY = height / 2 + dy * scale;
-
-    const size = w.size * scale;
-    ctx.font = `${size}px sans-serif`;
-    ctx.fillStyle = `hsla(330, 100%, 70%, ${w.glow * scale})`;
-    ctx.shadowColor = "#ff99cc";
-    ctx.shadowBlur = 10;
-    ctx.fillText(w.text, screenX, screenY);
+// Create hearts
+function createHearts(count = 50) {
+  hearts = [];
+  for (let i = 0; i < count; i++) {
+    hearts.push({
+      x: (Math.random() - 0.5) * 1000,
+      y: Math.random() * -2000,
+      z: Math.random() * 1000,
+      size: 10 + Math.random() * 10,
+      speed: 0.3 + Math.random()
+    });
   }
+}
 
+// Draw loop
+function draw() {
+  ctx.clearRect(0, 0, w, h);
+  ctx.save();
+  ctx.translate(w / 2, h / 2);
+
+  const perspective = 500;
+
+  // Texts
+  texts.forEach(t => {
+    t.y += t.speed;
+    if (t.y > 1000) t.y = -2000;
+
+    const scale = perspective / (perspective + t.z - camera.z);
+    const x = (t.x - camera.x) * scale;
+    const y = (t.y - camera.y) * scale;
+    const opacity = Math.min(1, scale * 2);
+    const fontSize = t.size * scale;
+
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.fillStyle = `rgba(255,192,203,${opacity})`;
+    ctx.shadowColor = `rgba(255,192,203,${opacity})`;
+    ctx.shadowBlur = 15 * scale;
+    ctx.fillText(t.text, x, y);
+  });
+
+  // Hearts
+  hearts.forEach(h => {
+    h.y += h.speed;
+    if (h.y > 1000) h.y = -2000;
+
+    const scale = perspective / (perspective + h.z - camera.z);
+    const x = (h.x - camera.x) * scale;
+    const y = (h.y - camera.y) * scale;
+    const size = h.size * scale;
+    const opacity = Math.min(1, scale * 2);
+
+    ctx.fillStyle = `rgba(255,0,0,${opacity})`;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x - size, y - size, x - size * 1.5, y + size, x, y + size * 1.5);
+    ctx.bezierCurveTo(x + size * 1.5, y + size, x + size, y - size, x, y);
+    ctx.fill();
+  });
+
+  ctx.restore();
   requestAnimationFrame(draw);
 }
 
+// Mouse controls for camera rotation
+let lastX = 0;
+let isDragging = false;
+
+canvas.addEventListener("mousedown", e => {
+  isDragging = true;
+  lastX = e.clientX;
+});
+
+canvas.addEventListener("mouseup", () => isDragging = false);
+canvas.addEventListener("mousemove", e => {
+  if (isDragging) {
+    const deltaX = e.clientX - lastX;
+    camera.x += deltaX * 1.5;
+    lastX = e.clientX;
+  }
+});
+
+// Touch support
+canvas.addEventListener("touchstart", e => {
+  lastX = e.touches[0].clientX;
+});
+
+canvas.addEventListener("touchmove", e => {
+  const deltaX = e.touches[0].clientX - lastX;
+  camera.x += deltaX * 1.5;
+  lastX = e.touches[0].clientX;
+});
+
+createTexts(200);
+createHearts(80);
 draw();
 </script>
 </body>
