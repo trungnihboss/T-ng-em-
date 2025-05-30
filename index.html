@@ -26,37 +26,42 @@ canvas.height = window.innerHeight;
 
 const phrases = [
   "Gửi bạn siêu xinh đẹp 💖",
-  "Dễ Thương",
-  "Lấp Lánh Như Ngôi Sao ✨",
+  "Anh.Trung<3Anh.Thư",
+  "Bạn là ánh sáng ✨",
   "Cười lên nha 😄",
-  "Xinh đẹp🌟"
+  "Bạn là điều dễ thương nhất 🌟"
 ];
 
-// 🌟 Ba lớp: near, middle, far (giảm số lượng chữ)
+// ⭐ Chia tỷ lệ chữ từng lớp
 const layers = {
   near: [],
   middle: [],
   far: []
 };
 
-const total = 20;
+const total = 30; // tổng số chữ
 for (let i = 0; i < total; i++) {
-  const layerName = i < total * 0.3 ? "near" : i < total * 0.6 ? "middle" : "far";
-  const depth = layerName === "near" ? 0.4 :
-                layerName === "middle" ? 1.0 : 2.2;
-  const z = layerName === "near" ? 100 :
+  const layerName =
+    i < total * 0.15 ? "near" :
+    i < total * 0.45 ? "middle" : "far";
+
+  const depth = layerName === "near" ? 0.5 :
+                layerName === "middle" ? 1.0 : 2.5;
+  const z = layerName === "near" ? 150 :
             layerName === "middle" ? 0 :
-            -350;
+            -400;
+
   layers[layerName].push({
     text: phrases[Math.floor(Math.random() * phrases.length)],
-    x: Math.random() * canvas.width,
+    x: (Math.random() - 0.5) * canvas.width * 1.5,
     y: Math.random() * -canvas.height,
     z: z + Math.random() * 100 - 50,
     depth: depth,
-    speed: layerName === "near" ? 3.5 : layerName === "middle" ? 2 : 1
+    speed: layerName === "near" ? 3 : layerName === "middle" ? 2 : 1
   });
 }
 
+// ⭐ Tạo bầu trời sao
 const stars = [];
 for (let i = 0; i < 200; i++) {
   stars.push({
@@ -69,6 +74,7 @@ for (let i = 0; i < 200; i++) {
 
 let angleX = 0, angleY = 0;
 
+// ⭐ Vẽ các ngôi sao nền
 function drawBackgroundStars() {
   for (let star of stars) {
     ctx.beginPath();
@@ -80,10 +86,11 @@ function drawBackgroundStars() {
   ctx.globalAlpha = 1.0;
 }
 
+// ⭐ Vẽ chữ từng lớp
 function drawLayer(layer, glowIntensity) {
   for (let l of layer) {
-    let perspectiveX = (l.z * Math.sin(angleX)) + (l.x - canvas.width/2) * Math.cos(angleX);
-    let perspectiveY = (l.z * Math.sin(angleY)) + (l.y - canvas.height/2) * Math.cos(angleY);
+    const perspectiveX = (l.z * Math.sin(angleX)) + (l.x) * Math.cos(angleX);
+    const perspectiveY = (l.z * Math.sin(angleY)) + (l.y) * Math.cos(angleY);
 
     const scale = 1 / l.depth;
     const drawX = canvas.width / 2 + perspectiveX;
@@ -103,7 +110,7 @@ function drawLayer(layer, glowIntensity) {
     l.y += l.speed / l.depth;
     if (l.y > canvas.height + 50) {
       l.y = -50;
-      l.x = Math.random() * canvas.width;
+      l.x = (Math.random() - 0.5) * canvas.width * 1.5;
       l.text = phrases[Math.floor(Math.random() * phrases.length)];
     }
   }
@@ -114,17 +121,18 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawBackgroundStars();
-  drawLayer(layers.far, 20);
-  drawLayer(layers.middle, 50);
+  drawLayer(layers.far, 15);
+  drawLayer(layers.middle, 40);
   drawLayer(layers.near, 80);
 
   requestAnimationFrame(draw);
 }
 draw();
 
-// Góc nhìn điều khiển
+// ⭐ Điều khiển góc nhìn bằng chuột / cảm ứng
 let isDragging = false;
 let lastX = 0, lastY = 0;
+
 function handleMove(x, y) {
   let dx = x - lastX;
   let dy = y - lastY;
@@ -155,6 +163,7 @@ canvas.addEventListener("touchmove", e => {
 canvas.addEventListener("touchend", () => isDragging = false);
 canvas.addEventListener("touchcancel", () => isDragging = false);
 
+// ⭐ Cập nhật kích thước khi thay đổi màn hình
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
