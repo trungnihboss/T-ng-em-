@@ -2,13 +2,13 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Gửi bạn siêu xinh đẹp 💖</title>
+  <title>Thế giới chữ 3D 💖</title>
   <style>
     html, body {
       margin: 0;
       overflow: hidden;
-      height: 100%;
       background: radial-gradient(ellipse at center, #0b0c2a 0%, #000000 100%);
+      height: 100%;
     }
     canvas {
       display: block;
@@ -17,149 +17,106 @@
 </head>
 <body>
 <canvas id="canvas"></canvas>
-
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const phrases = [
+const texts = [
   "Anh Trung 💖Anh Thư",
   "You are like an angel that saved my soul😍",
   "I love you for no reason, because you are yourself!😘",
   "My heart sobs because of you!💘"
 ];
 
-const layers = {
-  near: [],
-  middle: [],
-  far: []
-};
+const objects = [];
+const total = 100;
 
-// Cài đặt số lượng chữ cho từng lớp
-const total = 80;
 for (let i = 0; i < total; i++) {
-  const layerName = i < total * 0.15 ? "near" : i < total * 0.5 ? "middle" : "far";
-  const depth = layerName === "near" ? 0.5 :
-                layerName === "middle" ? 1.2 : 2.5;
-  const z = layerName === "near" ? 150 :
-            layerName === "middle" ? 0 :
-            -400;
-  layers[layerName].push({
-    text: phrases[Math.floor(Math.random() * phrases.length)],
-    x: Math.random() * canvas.width,
-    y: Math.random() * -canvas.height,
-    z: z + Math.random() * 100 - 50,
-    depth: depth,
-    speed: layerName === "near" ? 3.5 : layerName === "middle" ? 2.2 : 1.2
-  });
-}
-
-const stars = [];
-for (let i = 0; i < 300; i++) {
-  stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 1.5,
-    opacity: Math.random()
+  const depth = Math.random() * 2.5 + 0.5;
+  const z = (Math.random() - 0.5) * 2000;
+  objects.push({
+    text: texts[Math.floor(Math.random() * texts.length)],
+    x: (Math.random() - 0.5) * 2000,
+    y: (Math.random() - 0.5) * 2000,
+    z,
+    depth
   });
 }
 
 let angleX = 0, angleY = 0;
+let isDragging = false, lastX, lastY;
 
-function drawStars() {
-  for (let star of stars) {
-    ctx.beginPath();
-    ctx.globalAlpha = star.opacity;
-    ctx.fillStyle = "white";
-    ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1.0;
-}
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function drawLayer(layer, glow) {
-  for (let obj of layer) {
-    // Không xoay chữ theo góc nhìn — chỉ điều chỉnh vị trí
-    let px = (obj.x - canvas.width / 2);
-    let py = (obj.y - canvas.height / 2);
-    let pz = obj.z;
+  for (let obj of objects) {
+    const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+    const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
 
-    let rotatedX = px * Math.cos(angleX) - pz * Math.sin(angleX);
-    let rotatedZ = px * Math.sin(angleX) + pz * Math.cos(angleX);
+    let x = obj.x, y = obj.y, z = obj.z;
 
-    let rotatedY = py * Math.cos(angleY) - rotatedZ * Math.sin(angleY);
-    rotatedZ = py * Math.sin(angleY) + rotatedZ * Math.cos(angleY);
+    // Xoay theo trục Y (trái/phải)
+    let dx = cosX * x - sinX * z;
+    let dz = sinX * x + cosX * z;
 
-    let scale = 1 / obj.depth;
-    const screenX = canvas.width / 2 + rotatedX;
-    const screenY = canvas.height / 2 + rotatedY;
+    // Xoay theo trục X (lên/xuống)
+    let dy = cosY * y - sinY * dz;
+    dz = sinY * y + cosY * dz;
+
+    const scale = 800 / (800 + dz);
+    const screenX = canvas.width / 2 + dx * scale;
+    const screenY = canvas.height / 2 + dy * scale;
 
     ctx.save();
     ctx.translate(screenX, screenY);
     ctx.scale(scale, scale);
     ctx.shadowColor = "rgba(255,105,180,1)";
-    ctx.shadowBlur = glow / obj.depth;
-    ctx.font = `bold 36px 'Segoe UI', sans-serif`;
-    ctx.fillStyle = "rgba(255,105,180,0.9)";
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = "rgba(255,105,180,1)";
+    ctx.font = "bold 30px 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(obj.text, 0, 0);
     ctx.restore();
-
-    obj.y += obj.speed / obj.depth;
-    if (obj.y > canvas.height + 50) {
-      obj.y = -50;
-      obj.x = Math.random() * canvas.width;
-      obj.text = phrases[Math.floor(Math.random() * phrases.length)];
-    }
   }
+
+  requestAnimationFrame(draw);
 }
+draw();
 
-function render() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  drawStars();
-  drawLayer(layers.far, 20);
-  drawLayer(layers.middle, 60);
-  drawLayer(layers.near, 100);
-
-  requestAnimationFrame(render);
-}
-render();
-
-// Điều khiển góc nhìn
-let isDragging = false;
-let lastX = 0, lastY = 0;
-function moveView(x, y) {
-  const dx = x - lastX;
-  const dy = y - lastY;
-  angleX += dx * 0.002;
-  angleY += dy * 0.002;
-  lastX = x;
-  lastY = y;
-}
 canvas.addEventListener("mousedown", e => {
   isDragging = true;
   lastX = e.clientX;
   lastY = e.clientY;
 });
 canvas.addEventListener("mousemove", e => {
-  if (isDragging) moveView(e.clientX, e.clientY);
+  if (!isDragging) return;
+  const dx = e.clientX - lastX;
+  const dy = e.clientY - lastY;
+  angleX += dx * 0.005;
+  angleY += dy * 0.005;
+  lastX = e.clientX;
+  lastY = e.clientY;
 });
 canvas.addEventListener("mouseup", () => isDragging = false);
 canvas.addEventListener("mouseleave", () => isDragging = false);
+
 canvas.addEventListener("touchstart", e => {
   isDragging = true;
   lastX = e.touches[0].clientX;
   lastY = e.touches[0].clientY;
 });
 canvas.addEventListener("touchmove", e => {
-  if (isDragging) moveView(e.touches[0].clientX, e.touches[0].clientY);
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - lastX;
+  const dy = e.touches[0].clientY - lastY;
+  angleX += dx * 0.005;
+  angleY += dy * 0.005;
+  lastX = e.touches[0].clientX;
+  lastY = e.touches[0].clientY;
 });
 canvas.addEventListener("touchend", () => isDragging = false);
-canvas.addEventListener("touchcancel", () => isDragging = false);
 
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
