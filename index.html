@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Love in 3D - Hoàn hảo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Love 3D Mobile</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
+      touch-action: none;
       background: #000;
     }
     canvas {
@@ -19,237 +21,185 @@
       transform: translate(-50%, -50%);
       color: white;
       font-family: Arial, sans-serif;
-      font-size: 24px;
+      text-align: center;
+      width: 80%;
+    }
+    #error {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      width: 80%;
     }
   </style>
 </head>
 <body>
-  <div id="loading">Đang tải...</div>
-  
-  <!-- Three.js và các plugin từ CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/FontLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/geometries/TextGeometry.js"></script>
+  <div id="loading">Đang tải ứng dụng tình yêu...</div>
+  <div id="error"></div>
 
+  <!-- Three.js từ CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+  
   <script>
-    // Kiểm tra WebGL trước khi khởi tạo
+    // Kiểm tra WebGL và mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const errorElement = document.getElementById('error');
+    const loadingElement = document.getElementById('loading');
+
     if (!WEBGL.isWebGLAvailable()) {
-      document.body.innerHTML = '<h1 style="color:red;text-align:center;margin-top:50px;">Trình duyệt không hỗ trợ WebGL!<br>Vui lòng dùng Chrome/Firefox mới nhất</h1>';
+      errorElement.style.display = 'block';
+      errorElement.innerHTML = 'Thiết bị không hỗ trợ WebGL<br>Vui lòng dùng trình duyệt Chrome/Firefox mới nhất';
+      loadingElement.style.display = 'none';
       throw new Error('WebGL not supported');
     }
+
+    // Giảm chất lượng đồ họa trên mobile
+    const quality = isMobile ? 0.5 : 1;
 
     // Khởi tạo scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
-    // Camera
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.z = 60;
-    camera.position.y = 10;
-
-    // Renderer
+    // Camera phù hợp với mobile
+    const camera = new THREE.PerspectiveCamera(
+      60, 
+      window.innerWidth / window.innerHeight, 
+      0.1, 
+      1000
+    );
+    camera.position.z = isMobile ? 40 : 60;
+    
+    // Renderer tối ưu cho mobile
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      powerPreference: "high-performance"
+      powerPreference: isMobile ? "low-power" : "high-performance"
     });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Điều khiển camera
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 30;
-    controls.maxDistance = 150;
-
-    // Thiết lập ánh sáng
+    // Ánh sáng đơn giản hơn cho mobile
     const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(1, 1, 1).normalize();
     scene.add(directionalLight);
-    
-    const pointLight = new THREE.PointLight(0xff3366, 2, 100);
-    pointLight.position.set(20, 20, 20);
-    scene.add(pointLight);
 
-    // Danh sách tin nhắn yêu thương
-    const textList = [
-      "Always by my side",
-      "Love u in every universe",
-      "1 Year Anniversary",
-      "Anh Trung ❤ Anh Thư",
-      "Dành cho em tia nắng ấm cùng bao cơn gió",
-      "Mãi bên nhau em nhé",
-      "Yêu em nhiều hơn mỗi ngày",
-      "Together forever",
-      "My heart belongs to you"
-    ];
-
-    // Tải font chữ
-    const loader = new THREE.FontLoader();
-    const loadingManager = new THREE.LoadingManager();
-    
-    loadingManager.onStart = () => {
-      document.getElementById('loading').textContent = "Đang tải font chữ...";
+    // Tạo trái tim đơn giản
+    const createHeart = () => {
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.bezierCurveTo(0, 0, -2, -3, 0, -5);
+      shape.bezierCurveTo(2, -3, 0, 0, 0, 0);
+      
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: 0.5,
+        bevelEnabled: false // Tắt bevel để tối ưu
+      });
+      
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xff3366,
+        transparent: true,
+        opacity: 0.9
+      });
+      
+      return new THREE.Mesh(geometry, material);
     };
-    
-    loadingManager.onLoad = () => {
-      document.getElementById('loading').style.display = "none";
-    };
-    
-    loadingManager.onError = (url) => {
-      console.error("Lỗi khi tải: " + url);
-      document.getElementById('loading').textContent = "Lỗi khi tải tài nguyên!";
-    };
-
-    // Tạo các đoạn text 3D
-    loader.load(
-      'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json',
-      (font) => {
-        const textMaterial = new THREE.MeshPhongMaterial({
-          color: 0xff3366,
-          specular: 0xffaaaa,
-          shininess: 100,
-          transparent: true,
-          opacity: 0.9
-        });
-
-        // Tạo 100 đoạn text ngẫu nhiên
-        for (let i = 0; i < 100; i++) {
-          const message = textList[Math.floor(Math.random() * textList.length)];
-          const textGeo = new THREE.TextGeometry(message, {
-            font: font,
-            size: 1.5,
-            height: 0.2,
-            curveSegments: 4,
-            bevelEnabled: true,
-            bevelThickness: 0.05,
-            bevelSize: 0.05
-          });
-          
-          textGeo.computeBoundingBox();
-          const center = new THREE.Vector3();
-          textGeo.boundingBox.getCenter(center);
-          textGeo.translate(-center.x, -center.y, -center.z);
-
-          const mesh = new THREE.Mesh(textGeo, textMaterial);
-          mesh.position.set(
-            (Math.random() - 0.5) * 120,
-            (Math.random() - 0.5) * 120,
-            (Math.random() - 0.5) * 120
-          );
-          mesh.rotation.set(
-            Math.random() * Math.PI,
-            Math.random() * Math.PI,
-            Math.random() * Math.PI
-          );
-          scene.add(mesh);
-        }
-
-        animate();
-      },
-      undefined,
-      (err) => {
-        console.error("Lỗi khi tải font:", err);
-        document.getElementById('loading').textContent = "Không thể tải font chữ!";
-        // Tạo hình khối thay thế nếu không tải được font
-        const geometry = new THREE.SphereGeometry(5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({color: 0xff0000});
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
-        animate();
-      }
-    );
 
     // Tạo các trái tim bay
     const hearts = [];
-    const heartShape = new THREE.Shape();
-    heartShape.moveTo(0, 0);
-    heartShape.bezierCurveTo(0, 0, -2, -3, 0, -5);
-    heartShape.bezierCurveTo(2, -3, 0, 0, 0, 0);
-
-    const heartGeo = new THREE.ExtrudeGeometry(heartShape, {
-      depth: 0.5,
-      bevelEnabled: true,
-      bevelSize: 0.2,
-      bevelThickness: 0.3,
-      bevelSegments: 3
-    });
+    const heartCount = isMobile ? 15 : 30;
     
-    const heartMat = new THREE.MeshPhongMaterial({ 
-      color: 0xff3366,
-      specular: 0xffaaaa,
-      shininess: 100,
-      transparent: true,
-      opacity: 0.9
-    });
-
-    // Tạo 30 trái tim bay
-    for (let i = 0; i < 30; i++) {
-      const heart = new THREE.Mesh(heartGeo, heartMat);
-      heart.scale.set(0.5, 0.5, 0.5);
+    for (let i = 0; i < heartCount; i++) {
+      const heart = createHeart();
+      heart.scale.set(0.3, 0.3, 0.3);
       heart.position.set(
-        (Math.random() - 0.5) * 100,
-        (Math.random() - 0.5) * 100,
-        (Math.random() - 0.5) * 100
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60
       );
       heart.velocity = new THREE.Vector3(
-        (Math.random() - 0.5) * 0.5,
-        (Math.random() - 0.5) * 0.5,
-        (Math.random() - 0.5) * 0.5
-      );
-      heart.rotationSpeed = new THREE.Vector3(
-        Math.random() * 0.02,
-        Math.random() * 0.02,
-        Math.random() * 0.02
+        (Math.random() - 0.5) * 0.3,
+        (Math.random() - 0.5) * 0.3,
+        (Math.random() - 0.5) * 0.3
       );
       hearts.push(heart);
       scene.add(heart);
     }
 
-    // Xử lý thay đổi kích thước cửa sổ
+    // Text đơn giản (không dùng font 3D để tối ưu)
+    const texts = [
+      "Anh Trung ❤ Anh Thư",
+      "Mãi yêu em",
+      "1 Year Together",
+      "Love you forever"
+    ];
+    
+    const createText = (message) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = 512;
+      canvas.height = 256;
+      context.font = "Bold 40px Arial";
+      context.fillStyle = "rgba(255,51,102,0.8)";
+      context.textAlign = "center";
+      context.fillText(message, canvas.width/2, canvas.height/2);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(10, 5, 1);
+      
+      return sprite;
+    };
+    
+    // Thêm text vào scene
+    texts.forEach((text, i) => {
+      const textSprite = createText(text);
+      textSprite.position.set(
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80
+      );
+      scene.add(textSprite);
+    });
+
+    // Xử lý resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Hàm animation
+    // Ẩn loading khi tải xong
+    loadingElement.style.display = 'none';
+
+    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
-
-      // Cập nhật vị trí các trái tim
+      
+      // Di chuyển trái tim
       hearts.forEach(heart => {
         heart.position.add(heart.velocity);
-        heart.rotation.x += heart.rotationSpeed.x;
-        heart.rotation.y += heart.rotationSpeed.y;
+        heart.rotation.y += 0.01;
         
-        // Đổi hướng khi chạm biên
+        // Giới hạn di chuyển
         ['x', 'y', 'z'].forEach(axis => {
-          if (Math.abs(heart.position[axis]) > 60) {
+          if (Math.abs(heart.position[axis]) > 50) {
             heart.velocity[axis] *= -1;
           }
         });
       });
-
-      controls.update();
+      
       renderer.render(scene, camera);
     }
-
-    // Thêm hiệu ứng resize mượt mà
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }, 200);
-    });
+    
+    animate();
   </script>
 </body>
 </html>
