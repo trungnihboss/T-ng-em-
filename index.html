@@ -37,77 +37,28 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // Star background
-  const stars = [];
-  const starCount = 150;
-  for (let i = 0; i < starCount; i++) {
-    stars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.2,
-      alpha: 0.3 + Math.random() * 0.7,
-      speed: 0.01 + Math.random() * 0.02
-    });
-  }
-
+  // Danh sách nội dung chữ giữ nguyên
   const lines = [
     "Anh Trung 💖 Anh Thư",
-    "You are like an angel that saved my soul 😍",
-    "I love you for no reason, because you are yourself! 😘",
-    "My heart sobs because of you 💘"
+    "I love you forever",
+    "You're my sunshine 🌞",
+    "Always in my heart",
+    "Cùng nhau mãi mãi 💑",
+    "Mãi yêu em 💘",
+    "Em là tất cả 💝",
+    "Không thể thiếu em",
+    "Anh yêu em nhiều lắm!",
+    "My sweet love 💓"
   ];
 
-  let rotX = 0, rotY = 0;
-  let targetRotX = 0, targetRotY = 0;
-  let isDragging = false;
-  let lastX, lastY;
-
-  canvas.addEventListener('mousedown', e => {
-    isDragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  });
-  canvas.addEventListener('mouseup', () => isDragging = false);
-  canvas.addEventListener('mouseleave', () => isDragging = false);
-  canvas.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
-    targetRotY += dx * 0.002;
-    targetRotX += dy * 0.002;
-    targetRotX = Math.min(Math.max(targetRotX, -Math.PI / 4), Math.PI / 4);
-    lastX = e.clientX;
-    lastY = e.clientY;
-  });
-
-  canvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
-      isDragging = true;
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
-    }
-  });
-  canvas.addEventListener('touchend', () => isDragging = false);
-  canvas.addEventListener('touchcancel', () => isDragging = false);
-  canvas.addEventListener('touchmove', e => {
-    if (!isDragging || e.touches.length !== 1) return;
-    const dx = e.touches[0].clientX - lastX;
-    const dy = e.touches[0].clientY - lastY;
-    targetRotY += dx * 0.002;
-    targetRotX += dy * 0.002;
-    targetRotX = Math.min(Math.max(targetRotX, -Math.PI / 4), Math.PI / 4);
-    lastX = e.touches[0].clientX;
-    lastY = e.touches[0].clientY;
-  }, { passive: true });
-
+  // Tạo nhiều lớp chữ hơn
   class TextParticle {
-    constructor(text, x, y, z, layerIndex) {
+    constructor(text, x, y, z, size) {
       this.text = text;
       this.x = x;
       this.y = y;
       this.z = z;
-      this.layerIndex = layerIndex;
-      this.baseFontSize = 14 + layerIndex * 4;
+      this.size = size;
     }
     rotate(rotX, rotY) {
       let cosY = Math.cos(rotY), sinY = Math.sin(rotY);
@@ -120,92 +71,82 @@
     }
   }
 
-  const layersCount = 3;
   const particles = [];
-
-  for (let layer = 0; layer < layersCount; layer++) {
-    const depthZ = -80 + layer * 80;
-    const countPerLayer = 4;
-    for (let i = 0; i < countPerLayer; i++) {
-      const text = lines[(layer * countPerLayer + i) % lines.length];
-      let x = -150 + Math.random() * 300;
-      let y = -150 + Math.random() * 300;
-      let z = depthZ + (Math.random() * 40 - 20);
-      particles.push(new TextParticle(text, x, y, z, layer));
-    }
+  for (let i = 0; i < 100; i++) {
+    const text = lines[i % lines.length];
+    const x = -250 + Math.random() * 500;
+    const y = -250 + Math.random() * 500;
+    const z = -150 + Math.random() * 300;
+    const size = 14 + Math.random() * 10;
+    particles.push(new TextParticle(text, x, y, z, size));
   }
 
-  const focalLength = 250;
+  const focalLength = 300;
 
   function project(x, y, z) {
     const scale = focalLength / (focalLength + z);
     return { x: x * scale + W / 2, y: y * scale + H / 2, scale };
   }
 
-  // Heart rain
-  const hearts = [];
-  for (let i = 0; i < 50; i++) {
-    hearts.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      speed: 1 + Math.random() * 2,
-      size: 16 + Math.random() * 10,
-      char: '💖'
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    // stars
-    for (let s of stars) {
-      s.alpha += s.speed * (Math.random() * 0.5);
-      if (s.alpha > 1) s.alpha = 0.3;
-      ctx.fillStyle = `rgba(255,255,255,${s.alpha.toFixed(2)})`;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
+  // Trái tim rơi (vẽ bằng tay)
+  class Heart {
+    constructor() {
+      this.x = Math.random() * W;
+      this.y = -20;
+      this.size = 10 + Math.random() * 15;
+      this.speed = 0.2 + Math.random() * 0.3;
     }
-
-    rotX += (targetRotX - rotX) * 0.1;
-    rotY += (targetRotY - rotY) * 0.1;
-
-    const sorted = particles.map(p => {
-      const r = p.rotate(rotX, rotY);
-      return { ...p, rx: r.x, ry: r.y, rz: r.z };
-    }).sort((a, b) => b.rz - a.rz);
-
-    for (let p of sorted) {
-      const proj = project(p.rx, p.ry, p.rz);
-      const opacity = Math.min(Math.max((p.rz + 100) / 160, 0), 1);
-      const fontSize = p.baseFontSize * (0.7 + opacity * 0.6);
-
-      ctx.font = `bold ${fontSize.toFixed(1)}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(255, 105, 180, 0.7)';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = `rgba(255,105,180,${opacity.toFixed(2)})`;
-      ctx.fillText(p.text, proj.x, proj.y);
-      ctx.shadowBlur = 0;
-    }
-
-    // Draw falling hearts
-    for (let h of hearts) {
-      ctx.font = `${h.size}px Arial`;
-      ctx.fillStyle = "pink";
-      ctx.fillText(h.char, h.x, h.y);
-      h.y += h.speed;
-      if (h.y > H + 20) {
-        h.y = -20;
-        h.x = Math.random() * W;
+    update() {
+      this.y += this.speed;
+      if (this.y > H + this.size) {
+        this.y = -this.size;
+        this.x = Math.random() * W;
       }
     }
-
-    requestAnimationFrame(draw);
+    draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(this.size / 2, -this.size / 2, this.size, this.size / 3, 0, this.size);
+      ctx.bezierCurveTo(-this.size, this.size / 3, -this.size / 2, -this.size / 2, 0, 0);
+      ctx.fillStyle = 'rgba(255, 100, 150, 0.7)';
+      ctx.fill();
+      ctx.restore();
+    }
   }
 
-  draw();
+  const hearts = [];
+  for (let i = 0; i < 60; i++) hearts.push(new Heart());
+
+  let rotX = 0, rotY = 0;
+  let targetRotX = 0, targetRotY = 0;
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Vẽ trái tim rơi
+    hearts.forEach(h => {
+      h.update();
+      h.draw(ctx);
+    });
+
+    // Xoay và vẽ các dòng chữ
+    rotX += (targetRotX - rotX) * 0.05;
+    rotY += (targetRotY - rotY) * 0.05;
+
+    particles.forEach(p => {
+      const rotated = p.rotate(rotX, rotY);
+      const proj = project(rotated.x, rotated.y, rotated.z);
+      ctx.font = `${p.size * proj.scale}px Arial`;
+      ctx.fillStyle = `rgba(255, 200, 255, ${proj.scale})`;
+      ctx.fillText(p.text, proj.x, proj.y);
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
 })();
 </script>
 </body>
