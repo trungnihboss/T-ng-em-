@@ -39,7 +39,7 @@ const layers = {
   far: []
 };
 
-const total = 40;
+const total = 20;
 for (let i = 0; i < total; i++) {
   const layerName = i < total * 0.3 ? "near" : i < total * 0.6 ? "middle" : "far";
   const depth = layerName === "near" ? 0.4 :
