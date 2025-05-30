@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3D Falling Text</title>
+  <title>Chữ rơi 3D</title>
   <style>
     html, body {
       margin: 0;
@@ -16,139 +16,96 @@
   </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+  <canvas id="canvas"></canvas>
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
 
-<script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-let w, h;
-let texts = [];
-let hearts = [];
-let mouse = { x: 0, y: 0 };
-let camera = { x: 0, y: 0 };
-let textList = [
-  "Always by my side", "1 Year Anniversary", "Anh Trung<3Anh Thư",
-  "Love u in every universe", "Dành cho em tia nắng ấm"
-];
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-// Resize
-function resize() {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-}
-window.addEventListener("resize", resize);
-resize();
-
-// Generate text objects
-function createTexts(count = 150) {
-  texts = [];
-  for (let i = 0; i < count; i++) {
-    texts.push({
-      text: textList[Math.floor(Math.random() * textList.length)],
-      x: (Math.random() - 0.5) * 1000,
-      y: Math.random() * -2000,
-      z: Math.random() * 1000,
-      size: 20 + Math.random() * 30,
-      speed: 0.5 + Math.random() * 1.5
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     });
-  }
-}
 
-// Create hearts
-function createHearts(count = 50) {
-  hearts = [];
-  for (let i = 0; i < count; i++) {
-    hearts.push({
-      x: (Math.random() - 0.5) * 1000,
-      y: Math.random() * -2000,
-      z: Math.random() * 1000,
-      size: 10 + Math.random() * 10,
-      speed: 0.3 + Math.random()
+    const texts = [
+      "Anh Trung và Anh Thư",
+      "1 Year Anniversary",
+      "Always by my side",
+      "Love u in every universe",
+      "Dành cho em tia nắng ấm cùng bao cơn gió",
+    ];
+
+    const layers = [
+      { count: 20, depth: 0.2 },
+      { count: 30, depth: 0.5 },
+      { count: 40, depth: 0.9 }
+    ];
+
+    const particles = [];
+
+    for (const layer of layers) {
+      for (let i = 0; i < layer.count; i++) {
+        const text = texts[Math.floor(Math.random() * texts.length)];
+        particles.push({
+          text,
+          x: Math.random() * 2 - 1,
+          y: Math.random() * 2 - 1,
+          z: Math.random() * (1 - layer.depth) + layer.depth,
+          depth: layer.depth,
+        });
+      }
+    }
+
+    let camera = { x: 0, y: 0 };
+    let target = { x: 0, y: 0 };
+
+    document.addEventListener("mousemove", e => {
+      const percentX = (e.clientX / width - 0.5) * 2;
+      const percentY = (e.clientY / height - 0.5) * 2;
+      target.x = percentX * 0.5;
+      target.y = percentY * 0.5;
     });
-  }
-}
 
-// Draw loop
-function draw() {
-  ctx.clearRect(0, 0, w, h);
-  ctx.save();
-  ctx.translate(w / 2, h / 2);
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.fillRect(0, 0, width, height);
 
-  const perspective = 500;
+      camera.x += (target.x - camera.x) * 0.05;
+      camera.y += (target.y - camera.y) * 0.05;
 
-  // Texts
-  texts.forEach(t => {
-    t.y += t.speed;
-    if (t.y > 1000) t.y = -2000;
+      for (const p of particles) {
+        p.y += 0.004 * (1 / p.z);  // Rơi nhanh hơn nếu gần
 
-    const scale = perspective / (perspective + t.z - camera.z);
-    const x = (t.x - camera.x) * scale;
-    const y = (t.y - camera.y) * scale;
-    const opacity = Math.min(1, scale * 2);
-    const fontSize = t.size * scale;
+        if (p.y > 1.2) {
+          p.y = -1.2;
+          p.x = Math.random() * 2 - 1;
+          p.z = Math.random() * (1 - p.depth) + p.depth;
+        }
 
-    ctx.font = `${fontSize}px sans-serif`;
-    ctx.fillStyle = `rgba(255,192,203,${opacity})`;
-    ctx.shadowColor = `rgba(255,192,203,${opacity})`;
-    ctx.shadowBlur = 15 * scale;
-    ctx.fillText(t.text, x, y);
-  });
+        const perspective = 1 / p.z;
+        const x = (p.x - camera.x) * perspective * width / 2 + width / 2;
+        const y = (p.y - camera.y) * perspective * height / 2 + height / 2;
+        const size = perspective * 40;
+        const alpha = Math.max(0, 1 - p.z);
 
-  // Hearts
-  hearts.forEach(h => {
-    h.y += h.speed;
-    if (h.y > 1000) h.y = -2000;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate((p.x + p.y) * 0.5); // nhẹ nghiêng
+        ctx.font = `bold ${size}px sans-serif`;
+        ctx.fillStyle = `rgba(255, 150, 255, ${alpha})`; // Hồng sáng chói
+        ctx.shadowColor = "rgba(255, 100, 255, 0.8)";
+        ctx.shadowBlur = 15;
+        ctx.fillText(p.text, 0, 0);
+        ctx.restore();
+      }
 
-    const scale = perspective / (perspective + h.z - camera.z);
-    const x = (h.x - camera.x) * scale;
-    const y = (h.y - camera.y) * scale;
-    const size = h.size * scale;
-    const opacity = Math.min(1, scale * 2);
+      requestAnimationFrame(draw);
+    }
 
-    ctx.fillStyle = `rgba(255,0,0,${opacity})`;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.bezierCurveTo(x - size, y - size, x - size * 1.5, y + size, x, y + size * 1.5);
-    ctx.bezierCurveTo(x + size * 1.5, y + size, x + size, y - size, x, y);
-    ctx.fill();
-  });
-
-  ctx.restore();
-  requestAnimationFrame(draw);
-}
-
-// Mouse controls for camera rotation
-let lastX = 0;
-let isDragging = false;
-
-canvas.addEventListener("mousedown", e => {
-  isDragging = true;
-  lastX = e.clientX;
-});
-
-canvas.addEventListener("mouseup", () => isDragging = false);
-canvas.addEventListener("mousemove", e => {
-  if (isDragging) {
-    const deltaX = e.clientX - lastX;
-    camera.x += deltaX * 1.5;
-    lastX = e.clientX;
-  }
-});
-
-// Touch support
-canvas.addEventListener("touchstart", e => {
-  lastX = e.touches[0].clientX;
-});
-
-canvas.addEventListener("touchmove", e => {
-  const deltaX = e.touches[0].clientX - lastX;
-  camera.x += deltaX * 1.5;
-  lastX = e.touches[0].clientX;
-});
-
-createTexts(200);
-createHearts(80);
-draw();
-</script>
+    draw();
+  </script>
 </body>
 </html>
