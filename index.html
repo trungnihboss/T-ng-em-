@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Fixed Text Effect</title>
+<title>3D Fixed Text Effect - Sparse</title>
 <style>
   html, body {
     margin: 0; padding: 0; overflow: hidden;
@@ -126,14 +126,15 @@
   const layersCount = 3;
   const particles = [];
 
+  // Rải chữ trong vùng lớn hơn: x, y từ -150 tới +150, z theo lớp
   for(let layer=0; layer<layersCount; layer++){
-    const depthZ = -50 + layer*40;
-    const countPerLayer = 30;
+    const depthZ = -80 + layer*80; // xa dần
+    const countPerLayer = 4;  // giảm số lượng xuống còn 4 chữ mỗi lớp
     for(let i=0; i<countPerLayer; i++){
-      const text = lines[i % lines.length];
-      let x = -70 + Math.random()*140;
-      let y = -60 + Math.random()*140;
-      let z = depthZ + (Math.random()*20 - 10);
+      const text = lines[(layer*countPerLayer + i) % lines.length];
+      let x = -150 + Math.random()*300;
+      let y = -150 + Math.random()*300;
+      let z = depthZ + (Math.random()*40 - 20);
       particles.push(new TextParticle(text, x, y, z, layer));
     }
   }
@@ -173,19 +174,18 @@
     for(let p of sorted){
       const proj = project(p.rx, p.ry, p.rz);
 
-      const opacity = Math.min(Math.max((p.rz + 70) / 120, 0), 1);
+      const opacity = Math.min(Math.max((p.rz + 100) / 160, 0), 1);
       const fontSize = p.baseFontSize * (0.7 + opacity * 0.6);
 
       ctx.font = `bold ${fontSize.toFixed(1)}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.shadowColor = 'rgba(255, 182, 193, 0.7)';
+      ctx.shadowColor = 'rgba(255, 105, 180, 0.7)';
       ctx.shadowBlur = 12;
 
       ctx.fillStyle = `rgba(255,105,180,${opacity.toFixed(2)})`;
 
-      // Draw text fixed orientation (no rotation to face camera)
       ctx.fillText(p.text, proj.x, proj.y);
 
       ctx.shadowBlur = 0;
