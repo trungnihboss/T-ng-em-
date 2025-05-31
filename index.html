@@ -16,58 +16,51 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/geometries/TextGeometry.min.js"></script>
 
   <script>
-    // Scene, camera, renderer setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 60;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor(0x000010); // Deep dark blue
+    renderer.setClearColor(0x000010);
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // Ambient and point light for glowing effect
-    const ambient = new THREE.AmbientLight(0xffffff, 0.25);
-    scene.add(ambient);
-
-    // Light pink strong point light
-    const pinkLight = new THREE.PointLight(0xffe0f7, 3, 300); // #ffe0f7 is a very light, glowing pink
+    // Light setup
+    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+    const pinkLight = new THREE.PointLight(0xffc0e0, 3.5, 300);
     pinkLight.position.set(0, 30, 60);
     scene.add(pinkLight);
 
-    // Starry sky - particles
+    // Star background
     const starsGeometry = new THREE.BufferGeometry();
-    const starCount = 800;
     const starVertices = [];
-    for (let i = 0; i < starCount; i++) {
-      const x = (Math.random() - 0.5) * 500;
-      const y = (Math.random() - 0.5) * 500;
-      const z = (Math.random() - 0.5) * 500;
-      starVertices.push(x, y, z);
+    for (let i = 0; i < 800; i++) {
+      starVertices.push(
+        (Math.random() - 0.5) * 500,
+        (Math.random() - 0.5) * 500,
+        (Math.random() - 0.5) * 500
+      );
     }
     starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
     const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 });
-    const stars = new THREE.Points(starsGeometry, starsMaterial);
-    scene.add(stars);
+    scene.add(new THREE.Points(starsGeometry, starsMaterial));
 
-    // Load font and add glowing text & falling hearts
+    // Load font
     const loader = new THREE.FontLoader();
     loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
-      // Glowing light pink text
       const texts = [];
       const textMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffe0f7, // Light pink
-        metalness: 0.08,
-        roughness: 0.09,
-        emissive: 0xffe0f7, // Same as color for glow
-        emissiveIntensity: 8.5, // Super strong bright glow
-        toneMapped: false // Ensure color stays bright
+        color: 0xff9ecb,               // Sáng hơn, hồng nhạt nổi bật
+        metalness: 0.15,
+        roughness: 0.05,
+        emissive: 0xff9ecb,
+        emissiveIntensity: 14.0,       // Cực kỳ phát sáng
+        toneMapped: false
       });
 
-      // Messages
       const messages = [
         "Yêu Bạn Thư",
         "Cảm ơn vì đã đến ",
@@ -92,7 +85,7 @@
         texts.push({ mesh: textMesh, velocity: Math.random() * 0.06 + 0.02 });
       }
 
-      // Hearts - falling and not upside down
+      // Heart shape
       const heartShape = new THREE.Shape();
       heartShape.moveTo(0, 0);
       heartShape.bezierCurveTo(0, 0, -1.5, -1.5, -3, 0);
@@ -126,7 +119,7 @@
         });
       }
 
-      // Animation loop
+      // Animation
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
