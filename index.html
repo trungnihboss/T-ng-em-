@@ -2,17 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Floating Text & Hearts</title>
+  <title>3D Floating Text  Hearts</title>
   <style>
     body { margin: 0; overflow: hidden; background: black; }
     canvas { display: block; }
   </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/loaders/FontLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/geometries/TextGeometry.js"></script>
+  <!-- Three.js Core -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/build/three.min.js"></script>
+  <!-- OrbitControls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/controls/OrbitControls.min.js"></script>
+  <!-- FontLoader and TextGeometry -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/loaders/FontLoader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/geometries/TextGeometry.min.js"></script>
 
   <script>
     const scene = new THREE.Scene();
@@ -32,9 +35,9 @@
     const loader = new THREE.FontLoader();
     loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
       const texts = [];
-      const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff66ff });
+      const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffccff });
 
-      const messages = ["Yêu thương", "Kỷ niệm", "Mãi mãi", "Tình yêu", "Nhớ", "Thân thương", "Ấm áp", "Tình bạn"];
+      const messages = ["Yêu", "Thương", "Kỷ niệm", "Mãi mãi", "Tình yêu", "Ấm áp", "Bạn bè", "Nhớ"];
       const count = 150;
 
       for (let i = 0; i < count; i++) {
@@ -49,12 +52,11 @@
           (Math.random() - 0.5) * 100,
           (Math.random() - 0.5) * 100
         );
-        textMesh.rotation.order = "YXZ"; // để không xoay theo camera
         scene.add(textMesh);
         texts.push({ mesh: textMesh, velocity: Math.random() * 0.1 + 0.02 });
       }
 
-      // Trái tim
+      // Hearts
       const heartShape = new THREE.Shape();
       heartShape.moveTo(0, 0);
       heartShape.bezierCurveTo(0, 0, -1.5, -1.5, -3, 0);
