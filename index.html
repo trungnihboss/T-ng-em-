@@ -1,123 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Romantic 3D Scene</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: black; }
-    canvas { display: block; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không gian 3D</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/loaders/FontLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/geometries/TextGeometry.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/controls/OrbitControls.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
 <script>
-  let scene = new THREE.Scene();
-  let camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.set(0, 10, 100);
-
-  let renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  let controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-
-  // Star background
-  for (let i = 0; i < 500; i++) {
-    let star = new THREE.Mesh(
-      new THREE.SphereGeometry(0.1, 8, 8),
-      new THREE.MeshBasicMaterial({ color: 0xffffff })
-    );
-    star.position.set(
-      (Math.random() - 0.5) * 1000,
-      (Math.random() - 0.5) * 1000,
-      (Math.random() - 0.5) * 1000
-    );
-    scene.add(star);
-  }
-
-  let textMeshes = [];
-  let hearts = [];
-
-  // Load font and create floating texts
-  const loader = new THREE.FontLoader();
-  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    const phrases = [
-      "A.Trung<3A.Thư", "Always by my side", "1 Year Anniversary", 
-      "Love u in every universe", "Dành cho em tia nắng ấm"
-    ];
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
-
-    for (let i = 0; i < 100; i++) {
-      const textGeo = new THREE.TextGeometry(
-        phrases[Math.floor(Math.random() * phrases.length)],
-        {
-          font: font,
-          size: 2,
-          height: 0.2
-        }
-      );
-      const textMesh = new THREE.Mesh(textGeo, material.clone());
-      textMesh.position.set(
-        (Math.random() - 0.5) * 200,
-        Math.random() * 100,
-        (Math.random() - 0.5) * 200
-      );
-      textMesh.rotation.y = Math.random() * Math.PI;
-      scene.add(textMesh);
-      textMeshes.push(textMesh);
-    }
-  });
-
-  // Hearts falling
-  const heartShape = new THREE.Shape();
-  heartShape.moveTo(0, 0);
-  heartShape.bezierCurveTo(0, 0, -5, -5, 0, -10);
-  heartShape.bezierCurveTo(5, -5, 0, 0, 0, 0);
-  const heartGeom = new THREE.ShapeGeometry(heartShape);
-  const heartMaterial = new THREE.MeshBasicMaterial({ color: 0xff3366 });
-
-  for (let i = 0; i < 50; i++) {
-    let heart = new THREE.Mesh(heartGeom, heartMaterial.clone());
-    heart.scale.set(0.1, 0.1, 0.1);
-    heart.position.set(
-      (Math.random() - 0.5) * 200,
-      Math.random() * 100,
-      (Math.random() - 0.5) * 200
-    );
-    scene.add(heart);
-    hearts.push(heart);
-  }
-
-  // Animate
-  function animate() {
-    requestAnimationFrame(animate);
-
-    textMeshes.forEach(mesh => {
-      mesh.position.y -= 0.03;
-      if (mesh.position.y < -30) mesh.position.y = Math.random() * 100;
-    });
-
-    hearts.forEach(heart => {
-      heart.position.y -= 0.05;
-      if (heart.position.y < -30) heart.position.y = Math.random() * 100;
-    });
-
-    controls.update();
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    // Khởi tạo scene, camera và renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+    document.body.appendChild(renderer.domElement);
+
+    // Thêm các ngôi sao
+    function createStars() {
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+        const starVertices = [];
+        for (let i = 0; i < 1000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+    }
+    createStars();
+
+    // Thêm các dòng chữ phát sáng
+    function createText(text, position) {
+        const loader = new THREE.FontLoader();
+        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textGeometry = new THREE.TextGeometry(text, {
+                font: font,
+                size: 5,
+                height: 1,
+            });
+            const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+            textMesh.position.set(position.x, position.y, position.z);
+            scene.add(textMesh);
+
+            // Thêm hiệu ứng rơi nhẹ nhàng
+            function animateText() {
+                textMesh.position.y -= 0.05;
+                if (textMesh.position.y < -50) {
+                    textMesh.position.y = 50;
+                }
+                requestAnimationFrame(animateText);
+            }
+            animateText();
+        });
+    }
+    createText("Hello World!", { x: 0, y: 50, z: -100 });
+
+    // Thêm các trái tim rơi nhẹ
+    function createHearts() {
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(0, 0);
+        heartShape.bezierCurveTo(0, 0, -5, -5, -10, 0);
+        heartShape.bezierCurveTo(-15, 5, -10, 20, 0, 10);
+        heartShape.bezierCurveTo(10, 20, 15, 5, 10, 0);
+        heartShape.bezierCurveTo(5, -5, 0, 0, 0, 0);
+
+        const heartGeometry = new THREE.ShapeGeometry(heartShape);
+        const heartMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const hearts = [];
+
+        for (let i = 0; i < 20; i++) {
+            const heartMesh = new THREE.Mesh(heartGeometry, heartMaterial);
+            heartMesh.position.set(
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 100
+            );
+            scene.add(heartMesh);
+            hearts.push(heartMesh);
+        }
+
+        function animateHearts() {
+            hearts.forEach(heart => {
+                heart.position.y -= 0.1;
+                if (heart.position.y < -50) {
+                    heart.position.y = 50;
+                }
+            });
+            requestAnimationFrame(animateHearts);
+        }
+        animateHearts();
+    }
+    createHearts();
+
+    // Camera điều khiển góc nhìn
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    camera.position.set(0, 0, 100);
+    controls.update();
+
+    // Hiệu ứng render
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // Tự động thay đổi kích thước màn hình
+    window.addEventListener('resize', () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+    });
 </script>
 </body>
 </html>
