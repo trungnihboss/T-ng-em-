@@ -30,12 +30,13 @@
     controls.enableDamping = true;
 
     // Ambient and point light for glowing effect
-    const ambient = new THREE.AmbientLight(0xffffff, 0.15);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambient);
 
-    const pointLight = new THREE.PointLight(0xffffff, 1, 300);
-    pointLight.position.set(0, 30, 60);
-    scene.add(pointLight);
+    // Bright pinkish spotlight for more glow
+    const pinkLight = new THREE.PointLight(0xff1fae, 2.5, 300);
+    pinkLight.position.set(0, 30, 60);
+    scene.add(pinkLight);
 
     // Starry sky - particles
     const starsGeometry = new THREE.BufferGeometry();
@@ -55,14 +56,15 @@
     // Load font and add glowing text & falling hearts
     const loader = new THREE.FontLoader();
     loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
-      // Glowing pink text
+      // Glowing vibrant pink text
       const texts = [];
       const textMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff69b4, // Hot pink
-        metalness: 0.3,
-        roughness: 0.2,
-        emissive: 0xff69b4,
-        emissiveIntensity: 1.7 // Increase for more glow
+        color: 0xff1493, // Deep pink
+        metalness: 0.1,
+        roughness: 0.15,
+        emissive: 0xff1493, // Same as color for stronger glow
+        emissiveIntensity: 4.2, // Even stronger glow
+        toneMapped: false // Ensure color stays bright
       });
 
       // New messages as you requested
