@@ -30,11 +30,11 @@
     controls.enableDamping = true;
 
     // Ambient and point light for glowing effect
-    const ambient = new THREE.AmbientLight(0xffffff, 0.2);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.22);
     scene.add(ambient);
 
-    // Bright pinkish spotlight for more glow
-    const pinkLight = new THREE.PointLight(0xff1fae, 2.5, 300);
+    // Bright light pinkish spotlight for more glow
+    const pinkLight = new THREE.PointLight(0xffb6e6, 2.8, 300); // #ffb6e6 is a very light pink
     pinkLight.position.set(0, 30, 60);
     scene.add(pinkLight);
 
@@ -56,14 +56,14 @@
     // Load font and add glowing text & falling hearts
     const loader = new THREE.FontLoader();
     loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
-      // Glowing vibrant pink text
+      // Glowing light pink text
       const texts = [];
       const textMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff1493, // Deep pink
-        metalness: 0.1,
-        roughness: 0.15,
-        emissive: 0xff1493, // Same as color for stronger glow
-        emissiveIntensity: 4.2, // Even stronger glow
+        color: 0xffb6e6, // Light pink
+        metalness: 0.08,
+        roughness: 0.09,
+        emissive: 0xffb6e6, // Same as color for glow
+        emissiveIntensity: 6.5, // Strong bright glow
         toneMapped: false // Ensure color stays bright
       });
 
