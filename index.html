@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Yeu Ban Thu Nhieu</title>
+  <title>3D Floating Text & Hearts - Starry Sky</title>
   <style>
     body { margin: 0; overflow: hidden; background: black; }
     canvas { display: block; }
@@ -53,39 +53,59 @@
     loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
       const texts = [];
 
-      const textMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff99cc,
-        metalness: 0.1,
-        roughness: 0.05,
-        emissive: 0xff99cc,
-        emissiveIntensity: 10.5,
-        toneMapped: false
-      });
-
       const messages = [
-        "Yêu Bạn Thư",
-        "Cảm ơn vì đã đến",
-        "1 year anniversary",
-        "Yêu nhiều"
-      ];
+    "1 Year Anniversary",
+    "Always by my side",
+    "Love u in every universe",
+    "Yêu Bạn Thư"
+  ];
 
-      const count = 60;
+  const count = 100;
 
-      for (let i = 0; i < count; i++) {
-        const textGeo = new THREE.TextGeometry(messages[i % messages.length], {
-          font: font,
-          size: 2,
-          height: 0.2
-        });
-        const textMesh = new THREE.Mesh(textGeo, textMaterial);
-        textMesh.position.set(
-          (Math.random() - 0.5) * 40,
-          (Math.random() - 0.5) * 40 + 10,
-          (Math.random() - 0.5) * 40
-        );
-        scene.add(textMesh);
-        texts.push({ mesh: textMesh, velocity: Math.random() * 0.06 + 0.02 });
-      }
+  for (let i = 0; i < count; i++) {
+    const textGeo = new THREE.TextGeometry(messages[i % messages.length], {
+      font: font,
+      size: 1.8,
+      height: 0.1,
+      curveSegments: 6
+    });
+
+    // Text material - hồng sáng phát sáng
+    const textMat = new THREE.MeshBasicMaterial({
+      color: 0xffaaff,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+
+    const mesh = new THREE.Mesh(textGeo, textMat);
+    mesh.position.set(
+      (Math.random() - 0.5) * 50,
+      (Math.random() - 0.5) * 30 + 10,
+      (Math.random() - 0.5) * 50
+    );
+    scene.add(mesh);
+    texts.push({ mesh, velocity: Math.random() * 0.03 + 0.01 });
+
+    // Tạo hiệu ứng glow giả
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0xff66cc,
+      transparent: true,
+      opacity: 0.3,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+    const glowMesh = new THREE.Mesh(textGeo, glowMat);
+    glowMesh.scale.multiplyScalar(1.1);
+    glowMesh.position.copy(mesh.position);
+    scene.add(glowMesh);
+  }
+
+  // Rơi + animate...
+});
 
       // Hearts
       const heartShape = new THREE.Shape();
