@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Floating Text  Hearts</title>
+  <title>Roboto 3D Floating Text & Hearts</title>
   <style>
     body { margin: 0; overflow: hidden; background: black; }
     canvas { display: block; }
@@ -33,7 +33,7 @@
     scene.add(ambient);
 
     const loader = new THREE.FontLoader();
-    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    loader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/roboto_regular.typeface.json', function (font) {
       const texts = [];
       const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffccff });
 
