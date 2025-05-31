@@ -1,94 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>3D Text Love Scene</title>
+  <meta charset="UTF-8">
+  <title>Romantic 3D Scene</title>
   <style>
     body { margin: 0; overflow: hidden; background: black; }
     canvas { display: block; }
   </style>
 </head>
 <body>
-  <!-- Three.js & các script cần thiết -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/FontLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/geometries/TextGeometry.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/loaders/FontLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/geometries/TextGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/controls/OrbitControls.js"></script>
 
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+<script>
+  let scene = new THREE.Scene();
+  let camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.set(0, 10, 100);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    camera.position.z = 30;
-    controls.update();
+  let renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-    // Tải font từ thư mục cục bộ
-    const loader = new THREE.FontLoader();
-    loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
-      const messages = [
-        "Always by my side",
-        "1 Year Anniversary",
-        "Love u in every universe",
-        "Lt.long♡Ha.phng"
-      ];
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
 
-      for (let i = 0; i < 50; i++) {
-        const text = messages[Math.floor(Math.random() * messages.length)];
-        const geometry = new THREE.TextGeometry(text, {
+  // Star background
+  for (let i = 0; i < 500; i++) {
+    let star = new THREE.Mesh(
+      new THREE.SphereGeometry(0.1, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    star.position.set(
+      (Math.random() - 0.5) * 1000,
+      (Math.random() - 0.5) * 1000,
+      (Math.random() - 0.5) * 1000
+    );
+    scene.add(star);
+  }
+
+  let textMeshes = [];
+  let hearts = [];
+
+  // Load font and create floating texts
+  const loader = new THREE.FontLoader();
+  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    const phrases = [
+      "Lt.long♡Ha.phng", "Always by my side", "1 Year Anniversary", 
+      "Love u in every universe", "Dành cho em tia nắng ấm"
+    ];
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+
+    for (let i = 0; i < 100; i++) {
+      const textGeo = new THREE.TextGeometry(
+        phrases[Math.floor(Math.random() * phrases.length)],
+        {
           font: font,
-          size: 1,
-          height: 0.2,
-          curveSegments: 4
-        });
-
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const mesh = new THREE.Mesh(geometry, material);
-
-        mesh.position.set(
-          (Math.random() - 0.5) * 100,
-          Math.random() * 80,
-          (Math.random() - 0.5) * 100
-        );
-
-        mesh.userData.velocity = 0.03 + Math.random() * 0.05;
-        scene.add(mesh);
-      }
-
-      animate();
-    });
-
-    // Bầu trời sao
-    const starsGeometry = new THREE.BufferGeometry();
-    const starVertices = [];
-    for (let i = 0; i < 1000; i++) {
-      starVertices.push((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
-    }
-    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5 });
-    const stars = new THREE.Points(starsGeometry, starMaterial);
-    scene.add(stars);
-
-    function animate() {
-      requestAnimationFrame(animate);
-      scene.children.forEach(obj => {
-        if (obj.userData.velocity) {
-          obj.position.y -= obj.userData.velocity;
-          if (obj.position.y < -50) obj.position.y = 80;
+          size: 2,
+          height: 0.2
         }
-      });
-      controls.update();
-      renderer.render(scene, camera);
+      );
+      const textMesh = new THREE.Mesh(textGeo, material.clone());
+      textMesh.position.set(
+        (Math.random() - 0.5) * 200,
+        Math.random() * 100,
+        (Math.random() - 0.5) * 200
+      );
+      textMesh.rotation.y = Math.random() * Math.PI;
+      scene.add(textMesh);
+      textMeshes.push(textMesh);
     }
+  });
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+  // Hearts falling
+  const heartShape = new THREE.Shape();
+  heartShape.moveTo(0, 0);
+  heartShape.bezierCurveTo(0, 0, -5, -5, 0, -10);
+  heartShape.bezierCurveTo(5, -5, 0, 0, 0, 0);
+  const heartGeom = new THREE.ShapeGeometry(heartShape);
+  const heartMaterial = new THREE.MeshBasicMaterial({ color: 0xff3366 });
+
+  for (let i = 0; i < 50; i++) {
+    let heart = new THREE.Mesh(heartGeom, heartMaterial.clone());
+    heart.scale.set(0.1, 0.1, 0.1);
+    heart.position.set(
+      (Math.random() - 0.5) * 200,
+      Math.random() * 100,
+      (Math.random() - 0.5) * 200
+    );
+    scene.add(heart);
+    hearts.push(heart);
+  }
+
+  // Animate
+  function animate() {
+    requestAnimationFrame(animate);
+
+    textMeshes.forEach(mesh => {
+      mesh.position.y -= 0.03;
+      if (mesh.position.y < -30) mesh.position.y = Math.random() * 100;
     });
-  </script>
+
+    hearts.forEach(heart => {
+      heart.position.y -= 0.05;
+      if (heart.position.y < -30) heart.position.y = Math.random() * 100;
+    });
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
 </body>
 </html>
