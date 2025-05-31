@@ -30,11 +30,11 @@
     controls.enableDamping = true;
 
     // Ambient and point light for glowing effect
-    const ambient = new THREE.AmbientLight(0xffffff, 0.22);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.25);
     scene.add(ambient);
 
-    // Bright light pinkish spotlight for more glow
-    const pinkLight = new THREE.PointLight(0xffb6e6, 2.8, 300); // #ffb6e6 is a very light pink
+    // Light pink strong point light
+    const pinkLight = new THREE.PointLight(0xffe0f7, 3, 300); // #ffe0f7 is a very light, glowing pink
     pinkLight.position.set(0, 30, 60);
     scene.add(pinkLight);
 
@@ -59,15 +59,15 @@
       // Glowing light pink text
       const texts = [];
       const textMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffb6e6, // Light pink
+        color: 0xffe0f7, // Light pink
         metalness: 0.08,
         roughness: 0.09,
-        emissive: 0xffb6e6, // Same as color for glow
-        emissiveIntensity: 6.5, // Strong bright glow
+        emissive: 0xffe0f7, // Same as color for glow
+        emissiveIntensity: 8.5, // Super strong bright glow
         toneMapped: false // Ensure color stays bright
       });
 
-      // New messages as you requested
+      // Messages
       const messages = [
         "Yêu Bạn Thư",
         "Cảm ơn vì đã đến ",
