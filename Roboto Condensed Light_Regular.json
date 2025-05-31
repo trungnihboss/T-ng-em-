@@ -1,3 +1,1 @@
-loader.load(Roboto Condensed Light_Regular.typeface.json', function (font) {
-  // ...
-});
+
