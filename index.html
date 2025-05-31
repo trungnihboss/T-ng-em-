@@ -2,117 +2,154 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Floating Love Text</title>
+  <title>3D Floating Text & Hearts - Starry Sky</title>
   <style>
     body { margin: 0; overflow: hidden; background: black; }
     canvas { display: block; }
   </style>
 </head>
 <body>
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/controls/OrbitControls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/loaders/FontLoader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/geometries/TextGeometry.min.js"></script>
 
-<!-- Three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/FontLoader.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/geometries/TextGeometry.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 60;
 
-<script>
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.z = 60;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setClearColor(0x000010);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000010);
-  document.body.appendChild(renderer.domElement);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambient);
 
-  // 🌟 Stars
-  const starGeo = new THREE.BufferGeometry();
-  const starCount = 1000;
-  const starVertices = [];
-  for (let i = 0; i < starCount; i++) {
-    starVertices.push((Math.random() - 0.5) * 500);
-    starVertices.push((Math.random() - 0.5) * 500);
-    starVertices.push((Math.random() - 0.5) * 500);
-  }
-  starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-  const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 });
-  const stars = new THREE.Points(starGeo, starMat);
-  scene.add(stars);
+    const pinkLight = new THREE.PointLight(0xff99cc, 3, 300);
+    pinkLight.position.set(0, 30, 60);
+    scene.add(pinkLight);
 
-  // 💡 Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-  const pointLight = new THREE.PointLight(0xff99cc, 4, 300);
-  pointLight.position.set(0, 30, 50);
-  scene.add(pointLight);
+    // Starry background
+    const starsGeometry = new THREE.BufferGeometry();
+    const starVertices = [];
+    for (let i = 0; i < 800; i++) {
+      const x = (Math.random() - 0.5) * 500;
+      const y = (Math.random() - 0.5) * 500;
+      const z = (Math.random() - 0.5) * 500;
+      starVertices.push(x, y, z);
+    }
+    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+    const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 });
+    scene.add(new THREE.Points(starsGeometry, starsMaterial));
 
-  // 💬 Messages
-  const messages = [
-    "Anh Trung 💖Anh Thư",
-    "You are like an angel that saved my soul 😍",
-    "I love you for no reason, because you are yourself! 😘",
-    "My heart sobs because of you! 💘"
-  ];
+    // Load font
+    const loader = new THREE.FontLoader();
+    loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
+      const texts = [];
 
-  // 🌸 Load font
-  const loader = new THREE.FontLoader();
-  loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xffccff,
-      metalness: 0.05,
-      roughness: 0.1,
-      emissive: 0xff99cc,
-      emissiveIntensity: 8,
-      toneMapped: false
+      const textMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff99cc,
+        metalness: 0.1,
+        roughness: 0.05,
+        emissive: 0xff99cc,
+        emissiveIntensity: 10.5,
+        toneMapped: false
+      });
+
+      const messages = [
+        "Yêu Bạn Thư",
+        "Cảm ơn vì đã đến",
+        "1 year anniversary",
+        "Yêu nhiều"
+      ];
+
+      const count = 100;
+
+      for (let i = 0; i < count; i++) {
+        const textGeo = new THREE.TextGeometry(messages[i % messages.length], {
+          font: font,
+          size: 2,
+          height: 0.2
+        });
+        const textMesh = new THREE.Mesh(textGeo, textMaterial);
+        textMesh.position.set(
+          (Math.random() - 0.5) * 40,
+          (Math.random() - 0.5) * 40 + 10,
+          (Math.random() - 0.5) * 40
+        );
+        scene.add(textMesh);
+        texts.push({ mesh: textMesh, velocity: Math.random() * 0.06 + 0.02 });
+      }
+
+      // Hearts
+      const heartShape = new THREE.Shape();
+      heartShape.moveTo(0, 0);
+      heartShape.bezierCurveTo(0, 0, -1.5, -1.5, -3, 0);
+      heartShape.bezierCurveTo(-3, 3, 0, 4, 0, 6);
+      heartShape.bezierCurveTo(0, 4, 3, 3, 3, 0);
+      heartShape.bezierCurveTo(1.5, -1.5, 0, 0, 0, 0);
+
+      const heartGeo = new THREE.ShapeGeometry(heartShape);
+      const heartMat = new THREE.MeshStandardMaterial({
+        color: 0xff4d88,
+        emissive: 0xff1a4d,
+        emissiveIntensity: 1
+      });
+
+      const hearts = [];
+      for (let i = 0; i < 50; i++) {
+        const mesh = new THREE.Mesh(heartGeo, heartMat);
+        mesh.position.set(
+          (Math.random() - 0.5) * 40,
+          Math.random() * 40 + 25,
+          (Math.random() - 0.5) * 40
+        );
+        mesh.scale.setScalar(0.8 * (0.2 + Math.random() * 0.4));
+        mesh.rotation.z = Math.random() * Math.PI * 2;
+        scene.add(mesh);
+        hearts.push({
+          mesh,
+          velocity: Math.random() * 0.09 + 0.04,
+          swing: Math.random() * 0.04 + 0.02,
+          swingPhase: Math.random() * Math.PI * 2
+        });
+      }
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+
+        texts.forEach(obj => {
+          obj.mesh.position.y -= obj.velocity;
+          if (obj.mesh.position.y < -30) obj.mesh.position.y = 30;
+        });
+
+        hearts.forEach(obj => {
+          obj.mesh.position.y -= obj.velocity;
+          obj.mesh.position.x += Math.sin(Date.now() * 0.001 + obj.swingPhase) * obj.swing;
+          if (obj.mesh.position.y < -32)
+            obj.mesh.position.y = 32 + Math.random() * 6;
+        });
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
     });
 
-    const texts = [];
-    const count = 80;
-
-    for (let i = 0; i < count; i++) {
-      const geo = new THREE.TextGeometry(messages[i % messages.length], {
-        font: font,
-        size: 2,
-        height: 0.2,
-        curveSegments: 8,
-        bevelEnabled: false
-      });
-
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.position.set(
-        (Math.random() - 0.5) * 50,
-        Math.random() * 40,
-        (Math.random() - 0.5) * 50
-      );
-      mesh.rotation.y = (Math.random() - 0.5) * Math.PI;
-      scene.add(mesh);
-      texts.push({ mesh, velocity: Math.random() * 0.07 + 0.02 });
-    }
-
-    // 🔁 Animate
-    function animate() {
-      requestAnimationFrame(animate);
-      texts.forEach(obj => {
-        obj.mesh.position.y -= obj.velocity;
-        if (obj.mesh.position.y < -30) obj.mesh.position.y = 30;
-      });
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    animate();
-  });
-
-  // 🔄 Resize
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-</script>
-
+    // Resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
