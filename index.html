@@ -9,7 +9,7 @@
   </style>
 </head>
 <body>
-  <!-- Three.js Core -->
+  <!-- Three.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/controls/OrbitControls.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/js/loaders/FontLoader.min.js"></script>
@@ -28,21 +28,21 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // Light setup
-    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
-    const pinkLight = new THREE.PointLight(0xffc0e0, 3.5, 300);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambient);
+
+    const pinkLight = new THREE.PointLight(0xff99cc, 3, 300);
     pinkLight.position.set(0, 30, 60);
     scene.add(pinkLight);
 
-    // Star background
+    // Starry background
     const starsGeometry = new THREE.BufferGeometry();
     const starVertices = [];
     for (let i = 0; i < 800; i++) {
-      starVertices.push(
-        (Math.random() - 0.5) * 500,
-        (Math.random() - 0.5) * 500,
-        (Math.random() - 0.5) * 500
-      );
+      const x = (Math.random() - 0.5) * 500;
+      const y = (Math.random() - 0.5) * 500;
+      const z = (Math.random() - 0.5) * 500;
+      starVertices.push(x, y, z);
     }
     starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
     const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 });
@@ -52,21 +52,23 @@
     const loader = new THREE.FontLoader();
     loader.load('Roboto Condensed Light_Regular.typeface.json', function (font) {
       const texts = [];
+
       const textMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff9ecb,               // Sáng hơn, hồng nhạt nổi bật
-        metalness: 0.15,
+        color: 0xff99cc,
+        metalness: 0.1,
         roughness: 0.05,
-        emissive: 0xff9ecb,
-        emissiveIntensity: 14.0,       // Cực kỳ phát sáng
+        emissive: 0xff99cc,
+        emissiveIntensity: 10.5,
         toneMapped: false
       });
 
       const messages = [
         "Yêu Bạn Thư",
-        "Cảm ơn vì đã đến ",
+        "Cảm ơn vì đã đến",
         "1 year anniversary",
         "Yêu nhiều"
       ];
+
       const count = 100;
 
       for (let i = 0; i < count; i++) {
@@ -85,7 +87,7 @@
         texts.push({ mesh: textMesh, velocity: Math.random() * 0.06 + 0.02 });
       }
 
-      // Heart shape
+      // Hearts
       const heartShape = new THREE.Shape();
       heartShape.moveTo(0, 0);
       heartShape.bezierCurveTo(0, 0, -1.5, -1.5, -3, 0);
@@ -95,9 +97,9 @@
 
       const heartGeo = new THREE.ShapeGeometry(heartShape);
       const heartMat = new THREE.MeshStandardMaterial({
-        color: 0xff4d4d,
-        emissive: 0xff0022,
-        emissiveIntensity: 0.7
+        color: 0xff4d88,
+        emissive: 0xff1a4d,
+        emissiveIntensity: 1
       });
 
       const hearts = [];
@@ -119,7 +121,7 @@
         });
       }
 
-      // Animation
+      // Animation loop
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
@@ -142,7 +144,7 @@
       animate();
     });
 
-    // Responsive resize
+    // Resize handler
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
